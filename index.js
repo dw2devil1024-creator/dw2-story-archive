@@ -76,6 +76,15 @@ function report(message) {
     if (top) top.textContent = message;
     if (globalThis.toastr && message) globalThis.toastr.info(message, 'DW2 · Story Archive');
 }
+function flashShelfNotice(shell, message, delay = 2200) {
+    if (!shell?.notice) return;
+    clearTimeout(shell.noticeTimer);
+    shell.notice.textContent = message;
+    shell.noticeTimer = setTimeout(() => {
+        if (shell.notice.textContent === message) shell.notice.textContent = '';
+        shell.noticeTimer = null;
+    }, delay);
+}
 const loadWelcome = () => welcomeModule ||= import(new URL('scripts/welcome-screen.js', appRoot).href);
 const loadCore = () => coreModule ||= import(new URL('script.js', appRoot).href);
 const loadGroups = () => groupModule ||= import(new URL('scripts/group-chats.js', appRoot).href);
@@ -582,7 +591,7 @@ function card(entity, shell) {
             if (!wasPinned) s.pinned.push(entity.key);
             save();
             for (const view of shells) view.draw();
-            shell.notice.textContent = `${entity.name}${wasPinned ? '已取消置顶' : '已置顶'}`;
+            flashShelfNotice(shell, `${entity.name}${wasPinned ? '已取消置顶' : '已置顶'}`);
             [...shell.grid.children].find(card => card.dataset.key === entity.key)?.querySelector('.jd-pin')?.focus({ preventScroll: true });
         }, `${pinned ? '取消置顶' : '置顶'}${entity.name}`);
         pin.setAttribute('aria-pressed', String(pinned));
@@ -668,7 +677,7 @@ function createShelf(isHome = false) {
     const notice = element('p', 'jd-shelf-notice'); notice.setAttribute('role', 'status');
     const grid = element('div', 'jd-story-grid');
     const pager = element('nav', 'jd-pager'); pager.setAttribute('aria-label', '书架分页');
-    const shell = { root, grid, notice, ...shelfView(settings()), query: '', sortRun: 0,
+    const shell = { root, grid, notice, ...shelfView(settings()), query: '', sortRun: 0, noticeTimer: null,
         entities: new Map(), visible: new Map(), countTargets: new Set(), visibility: null, dispose: null, draw: null };
     shell.remember = () => {
         shell.viewTouched = true;
@@ -765,7 +774,7 @@ function createShelf(isHome = false) {
     };
     search.addEventListener('input', event => { if (!event.isComposing) scheduleSearch(); });
     search.addEventListener('compositionend', scheduleSearch);
-    shell.dispose = () => { shell.layout?.dispose(); closeSort(); clearTimeout(searchTimer); shell.sortRun++; shell.organizer.dispose(); shell.visibility?.disconnect(); shell.visible.clear(); shell.countTargets.clear(); shells.delete(shell); };
+    shell.dispose = () => { shell.layout?.dispose(); closeSort(); clearTimeout(searchTimer); clearTimeout(shell.noticeTimer); shell.noticeTimer = null; shell.sortRun++; shell.organizer.dispose(); shell.visibility?.disconnect(); shell.visible.clear(); shell.countTargets.clear(); shells.delete(shell); };
     shells.add(shell); shell.draw(); return shell;
 }
 
