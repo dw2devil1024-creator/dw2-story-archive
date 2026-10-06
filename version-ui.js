@@ -23,11 +23,30 @@ export function openVersionDialog({ manager, element, button, dialog, currentVer
         label.append(input, store); body.append(label); inputs.push(input, store);
     }
     const check = button('检查更新', 'jd-version-action jd-version-check', async () => {
-        await run(async () => {
-            checked = await manager.check();
-            details.textContent = checked.latest ? `V${checked.latest.version}\n${checked.latest.notes}` : checked.unavailableLatest ? '新版暂未完成发布或与当前酒馆不兼容。' : '当前没有可用的新版本。';
-            notice.textContent = checked.previous ? `可退回 V${checked.previous.version}。切换前会保存书架设置备份。` : '暂无更早的兼容版本可回退。';
-        });
+        check.textContent = '正在检查…';
+        try {
+            await run(async () => {
+                checked = await manager.check();
+                if (checked.latest?.kind === 'latest') {
+                    details.textContent = `检测到主线更新\n${checked.latest.notes}`;
+                    notice.textContent = checked.previous
+                        ? `检查完成 · 可更新到最新版，也可退回 V${checked.previous.version}。`
+                        : '检查完成 · 检测到可用更新。';
+                } else if (checked.latest) {
+                    details.textContent = `V${checked.latest.version}\n${checked.latest.notes}`;
+                    notice.textContent = checked.previous
+                        ? `检查完成 · 可更新到 V${checked.latest.version}，也可退回 V${checked.previous.version}。`
+                        : `检查完成 · 可更新到 V${checked.latest.version}。`;
+                } else {
+                    details.textContent = checked.unavailableLatest ? '新版暂未完成发布或与当前酒馆不兼容。' : '当前已是最新版。';
+                    notice.textContent = checked.previous
+                        ? `检查完成 · 当前已是最新版，可退回 V${checked.previous.version}。`
+                        : '检查完成 · 当前已是最新版。';
+                }
+            });
+        } finally {
+            check.textContent = '检查更新';
+        }
     });
     const update = button('更新到最新版', 'jd-version-action jd-version-update', () => confirm(checked?.latest));
     const rollback = button('退回上一版本', 'jd-version-action jd-version-rollback', () => confirm(checked?.previous));
@@ -42,7 +61,11 @@ export function openVersionDialog({ manager, element, button, dialog, currentVer
         check.disabled = manager.busy || manager.reloadNeeded;
         update.disabled = manager.busy || manager.reloadNeeded || !checked?.latest;
         rollback.disabled = manager.busy || manager.reloadNeeded || !checked?.previous;
-        update.textContent = checked?.latest ? `更新到 V${checked.latest.version}` : '更新到最新版';
+        update.textContent = checked?.latest?.kind === 'latest'
+            ? '更新到最新版'
+            : checked?.latest
+                ? `更新到 V${checked.latest.version}`
+                : '更新到最新版';
         rollback.textContent = checked?.previous ? `退回 V${checked.previous.version}` : '退回上一版本';
     }
     async function run(action) {
@@ -54,7 +77,7 @@ export function openVersionDialog({ manager, element, button, dialog, currentVer
     }
     function confirm(target) {
         if (!target || manager.busy || manager.reloadNeeded) return;
-        const prompt = dialog(`切换到 V${target.version}？`);
+        const prompt = dialog(target.kind === 'latest' ? '更新到最新版？' : `切换到 V${target.version}？`);
         prompt.body.append(element('p', 'jd-dialog-intro', target.notes || '将切换书架程序版本，保留当前书架设置。'));
         prompt.body.append(element('p', 'jd-dialog-intro', '会先保存设置备份。兼容的分类、收藏、置顶与封面位置继续保留；旧版本可能不显示新增功能。'));
         if (target.version === '1.4.0') prompt.body.append(element('p', 'jd-dialog-intro', 'V1.4.0 尚无位置记忆和版本按钮。回退后，如需再升级，助手版需重新导入新版 JSON；独立扩展可从酒馆扩展管理切回 main。'));
