@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.6.1",
+  "latest": "1.6.2",
   "releases": [
+    {
+      "version": "1.6.2",
+      "branch": "v1.6.2",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.6.2-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "彻底解除 DW2 与酒馆主题的颜色/字体绑定：固定独立配色与 Noto Serif SC；同时提亮文件夹/排序菜单为更透明的水蓝烟熏玻璃。"
+    },
     {
       "version": "1.6.1",
       "branch": "v1.6.1",
