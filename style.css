@@ -1454,3 +1454,56 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
     padding:0 15px 15px!important;
   }
 }
+
+/* ===== DW2 cross-device equal-height cards · v1.5.1 ===== */
+/*
+  Grid rows stretch to their tallest card. The card button and text panel then
+  fill that height, so font metrics / device text scaling cannot leave one card
+  visibly shorter than its neighbors. Cover ratio and crop remain untouched.
+*/
+.jd-story-grid{
+  align-items:stretch!important;
+}
+
+.jd-story-card{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  min-height:0;
+}
+
+.jd-bookshelf .jd-open-card{
+  display:flex!important;
+  flex:1 1 auto;
+  flex-direction:column;
+  width:100%;
+  height:100%;
+  min-height:0;
+}
+
+.jd-story-card .jd-cover{
+  flex:0 0 auto;
+}
+
+.jd-story-card .jd-card-body{
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:column;
+  min-height:0;
+}
+
+.jd-story-card .jd-card-bottom{
+  margin-top:auto;
+  min-width:0;
+  white-space:nowrap;
+}
+
+.jd-story-card .jd-last-played{
+  min-width:0;
+}
+
+.jd-story-card .jd-card-action{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+/* ===== /DW2 cross-device equal-height cards · v1.5.1 ===== */
