@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.5.7",
+  "latest": "1.5.8",
   "releases": [
+    {
+      "version": "1.5.8",
+      "branch": "v1.5.8",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.5.8-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "修复移动角色卡后的状态提示长期停留；文件夹重命名/删除操作移到文件夹列表前半段，不再被标签列表埋在底部。"
+    },
     {
       "version": "1.5.7",
       "branch": "v1.5.7",
