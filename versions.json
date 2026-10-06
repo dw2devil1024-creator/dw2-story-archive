@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.5.1",
+  "latest": "1.5.2",
   "releases": [
+    {
+      "version": "1.5.2",
+      "branch": "v1.5.2",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.5.2-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "恢复版本管理弹窗中的常驻“刷新酒馆”快捷按钮，并保留 V1.5 系列新版玻璃样式。"
+    },
     {
       "version": "1.5.1",
       "branch": "v1.5.1",
