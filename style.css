@@ -1520,3 +1520,150 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   white-space:nowrap;
 }
 /* ===== /DW2 cross-device equal-height cards · v1.5.1 ===== */
+
+/* ===== DW2 version confirmation polish · v1.5.6 ===== */
+.jd-shelf-dialog.jd-version-confirm{
+  width:min(500px,calc(100vw - 28px))!important;
+  max-width:min(500px,calc(100vw - 28px))!important;
+  overflow:hidden;
+  border:1px solid rgba(232,220,208,.16)!important;
+  border-top:1px solid rgba(255,244,233,.28)!important;
+  border-radius:15px!important;
+  background:
+    linear-gradient(145deg,rgba(42,36,32,.88),rgba(22,19,17,.92))!important;
+  box-shadow:0 26px 72px rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(22px) saturate(110%);
+  -webkit-backdrop-filter:blur(22px) saturate(110%);
+}
+
+.jd-version-confirm .jd-dialog-head{
+  padding:17px 18px 14px;
+  background:transparent!important;
+  border-bottom:1px solid rgba(232,220,208,.10)!important;
+}
+
+.jd-version-confirm .jd-dialog-head h2{
+  font-size:18px!important;
+  font-weight:500!important;
+  letter-spacing:.055em;
+  color:rgba(255,248,242,.95)!important;
+}
+
+.jd-version-confirm .jd-dialog-head .jd-icon-button{
+  width:30px;
+  min-width:30px;
+  height:30px;
+  min-height:30px;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  color:rgba(255,248,242,.50)!important;
+  font-size:21px!important;
+  opacity:1;
+}
+
+.jd-version-confirm .jd-dialog-head .jd-icon-button:hover{
+  border:0!important;
+  background:rgba(255,255,255,.05)!important;
+  color:rgba(255,248,242,.92)!important;
+}
+
+.jd-version-confirm .jd-dialog-body{
+  padding:18px 18px 19px;
+}
+
+.jd-version-confirm .jd-dialog-intro{
+  margin:0 0 13px;
+  color:rgba(247,239,232,.68)!important;
+  font-size:12.5px;
+  line-height:1.8;
+}
+
+.jd-version-confirm .jd-version-confirm-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin-top:18px;
+}
+
+.jd-version-confirm .jd-version-confirm-button{
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  margin:0!important;
+  padding:10px 14px!important;
+  border-radius:10px!important;
+  font-size:13px!important;
+  font-weight:500;
+  line-height:1.35;
+  letter-spacing:.04em;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    color .16s ease!important;
+}
+
+.jd-version-confirm .jd-version-confirm-cancel{
+  border:1px solid rgba(232,220,208,.13)!important;
+  background:rgba(255,255,255,.028)!important;
+  color:rgba(255,248,242,.58)!important;
+}
+
+.jd-version-confirm .jd-version-confirm-apply{
+  border:1px solid rgba(222,193,169,.22)!important;
+  background:
+    linear-gradient(135deg,rgba(222,193,169,.12),rgba(255,255,255,.035))!important;
+  color:rgba(255,249,244,.90)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)!important;
+}
+
+.jd-version-confirm .jd-version-confirm-button:hover{
+  transform:translateY(-1px);
+}
+
+.jd-version-confirm .jd-version-confirm-cancel:hover{
+  border-color:rgba(232,220,208,.22)!important;
+  background:rgba(255,255,255,.05)!important;
+  color:rgba(255,248,242,.82)!important;
+}
+
+.jd-version-confirm .jd-version-confirm-apply:hover{
+  border-color:rgba(230,201,177,.34)!important;
+  background:
+    linear-gradient(135deg,rgba(222,193,169,.17),rgba(255,255,255,.055))!important;
+  color:rgba(255,252,248,.98)!important;
+}
+
+.jd-version-confirm .jd-version-confirm-button:focus-visible{
+  outline:1px solid rgba(242,218,184,.52)!important;
+  outline-offset:2px!important;
+}
+
+@media(max-width:430px){
+  .jd-shelf-dialog.jd-version-confirm{
+    width:min(94vw,500px)!important;
+    max-width:94vw!important;
+    border-radius:13px!important;
+  }
+
+  .jd-version-confirm .jd-dialog-head{
+    padding:15px 15px 12px;
+  }
+
+  .jd-version-confirm .jd-dialog-body{
+    padding:16px 15px 17px;
+  }
+
+  .jd-version-confirm .jd-version-confirm-actions{
+    gap:8px;
+  }
+
+  .jd-version-confirm .jd-version-confirm-button{
+    min-height:42px;
+    padding:9px 10px!important;
+    font-size:12.5px!important;
+  }
+}
+/* ===== /DW2 version confirmation polish · v1.5.6 ===== */
