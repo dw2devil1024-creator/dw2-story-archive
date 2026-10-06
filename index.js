@@ -865,7 +865,7 @@ function installControls() {
             if (['Enter', ' '].includes(event.key)) { event.preventDefault(); event.stopPropagation(); header.click(); }
         });
         const content = element('div', 'inline-drawer-content'); content.id = 'jd-bookshelf-settings-content';
-        content.append(element('small', 'jd-install-status', `已加载 · V${BOOKSHELF_VERSION} · 配色跟随当前酒馆主题`));
+        content.append(element('small', 'jd-install-status', `已加载 · V${BOOKSHELF_VERSION} · DW2 独立视觉`));
         const label = element('label', 'checkbox_label'); const check = element('input'); check.type = 'checkbox'; check.checked = settings().enabled;
         check.addEventListener('change', () => { settings().enabled = check.checked; dismissedHome = false; save(); scheduleHome(); });
         label.append(check, element('span', '', '首页显示 Story Archive'));
