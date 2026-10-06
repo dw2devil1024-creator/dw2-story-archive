@@ -7,7 +7,7 @@ A customized SillyTavern / TauriTavern character shelf and story archive.
 
 ## 当前版本
 
-**v1.5.8**
+**v1.5.9**
 
 ## 安装
 
