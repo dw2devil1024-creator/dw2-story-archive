@@ -1320,7 +1320,7 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-version-dialog .jd-version-check::before{content:"↻";}
 .jd-version-dialog .jd-version-update::before{content:"↑";}
 .jd-version-dialog .jd-version-rollback::before{content:"↶";}
-.jd-version-dialog .jd-version-reload::before{content:"⟳";}
+.jd-version-dialog .jd-version-reload::before{content:"↻";}
 
 .jd-version-dialog .jd-version-action:not(:disabled):hover{
   transform:translateY(-1px);
