@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.6.0",
+  "latest": "1.6.1",
   "releases": [
+    {
+      "version": "1.6.1",
+      "branch": "v1.6.1",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.6.1-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "菜单横向收窄并改为更利落的直角水蓝玻璃点缀；同时将 DW2 整体字体固定为 Noto Serif SC，不再跟随酒馆主题字体。"
+    },
     {
       "version": "1.6.0",
       "branch": "v1.6.0",
