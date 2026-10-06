@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.5.9",
+  "latest": "1.6.0",
   "releases": [
+    {
+      "version": "1.6.0",
+      "branch": "v1.6.0",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.6.0-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "重做文件夹与排序下拉面板的视觉层级：更细的暖棕烟熏玻璃、细暖金选中侧线、轻 hover、标签与管理区分组，并保持与酒馆主题解耦。"
+    },
     {
       "version": "1.5.9",
       "branch": "v1.5.9",
