@@ -1,9 +1,9 @@
 # DW2 · Story Archive
 
-A customized SillyTavern / TauriTavern character shelf and story archive.
+A SillyTavern / TauriTavern character shelf and story archive.
 
-> Based on **砚台 · 角色书架** by 阿砚 · Codex.  
-> This repository keeps the original internal storage namespace for compatibility while maintaining the customized interface as **DW2 · Story Archive**.
+> **DW2 · Story Archive**  
+> by **Devil · ChatGPT**
 
 ## 当前版本
 
@@ -38,5 +38,4 @@ https://github.com/dw2devil1024-creator/dw2-story-archive
 
 ## Credits
 
-Original project: **砚台 · 角色书架** — 阿砚 · Codex  
-Customized build: **DW2 · Story Archive**
+**DW2 · Story Archive** — **Devil · ChatGPT**
