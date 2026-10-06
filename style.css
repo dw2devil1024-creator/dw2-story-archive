@@ -1,0 +1,1161 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+
+/* Static, scoped UI. Uses the active theme's colors and font.
+   Backdrop blur is left to the theme; do not force it off or add per-card blur.
+   Underline/accent colors are decorative; readable controls use body ink. */
+.jd-bookshelf,.jd-shelf-dialog{
+  --shelf-ink:var(--SmartThemeBodyColor,#ece8df);
+  --shelf-accent:var(--SmartThemeUnderlineColor,#c6b590);
+  --shelf-muted:var(--SmartThemeEmColor,#aeb8ac);
+  --shelf-line:var(--SmartThemeBorderColor,#45564a);
+  --shelf-panel:var(--SmartThemeBlurTintColor,#14201b);
+  --shelf-inset:var(--SmartThemeUserMesBlurTintColor,#1b2a21);
+  --shelf-font:var(--jd-font,var(--mainFontFamily,serif));
+  box-sizing:border-box;color:var(--shelf-ink);font-family:var(--shelf-font);
+  line-height:1.65;text-align:left;text-indent:0;text-shadow:none;
+}
+@supports(color:color-mix(in srgb,#000 50%,#fff)){
+  .jd-bookshelf,.jd-shelf-dialog{
+    --shelf-muted:color-mix(in srgb,var(--shelf-ink) 60%,var(--shelf-panel));
+    --shelf-soft-line:color-mix(in srgb,var(--shelf-line) 70%,var(--shelf-panel));
+  }
+}
+.jd-bookshelf *,.jd-shelf-dialog *{box-sizing:border-box;text-indent:0!important;text-shadow:none!important;}
+.jd-bookshelf button,.jd-shelf-dialog button{
+  font-family:inherit;cursor:pointer;appearance:none;color:inherit;letter-spacing:inherit;
+  text-transform:none;text-shadow:none;box-shadow:none;filter:none;transition:none;
+}
+.jd-bookshelf button:disabled,.jd-shelf-dialog button:disabled{cursor:not-allowed;opacity:.58;}
+.jd-shelf-dialog .jd-version-actions[aria-busy=true] button:disabled{cursor:wait;}
+.jd-bookshelf :is(button,input):focus-visible,.jd-shelf-dialog :is(button,input):focus-visible{outline:2px solid var(--shelf-ink);outline-offset:3px;}
+.jd-bookshelf{width:100%;min-width:0;max-width:1420px;margin:0 auto;padding:calc(16px + var(--jd-home-inset-top,0px)) 20px calc(28px + var(--jd-home-inset-bottom,0px));container-type:inline-size;}
+#chat.jd-bookshelf-home{padding:0!important;overflow-y:auto;scroll-padding-top:calc(12px + var(--jd-home-inset-top,0px));scroll-padding-bottom:calc(12px + var(--jd-home-inset-bottom,0px));}
+#chat.jd-bookshelf-home>.jd-bookshelf{flex:0 0 auto;}
+/* Replace only native welcome content, not arbitrary children / popup hosts.
+   Keep the native composer and extension entry points available. */
+body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.welcomePanel,
+body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[type="welcome_prompt"],[type="assistant_message"],[type="assistant_note"]){display:none!important;}
+#jd-bookshelf-return{flex:0 0 auto;width:auto;white-space:nowrap;text-indent:0;text-shadow:none;}
+#jd-bookshelf-return:focus-visible{outline:2px solid currentColor;outline-offset:2px;}
+.jd-bookshelf .jd-text-button,.jd-shelf-dialog .jd-text-button{padding:5px 0;min-height:30px;border:0;background:none;font-size:12px;line-height:1.5;color:var(--shelf-muted);}
+.jd-bookshelf .jd-text-button:hover,.jd-shelf-dialog .jd-text-button:hover{color:var(--shelf-ink);}
+.jd-shelf-toolbar{position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 12px;margin:0;}
+.jd-shelf-navigation{display:flex;align-items:center;gap:2px;min-width:0;}
+.jd-tabs{display:flex;align-items:center;gap:2px;flex:0 0 auto;}
+.jd-bookshelf .jd-tab{background:none;border:1px solid transparent;border-radius:3px;padding:5px 10px;min-height:40px;font-size:14px;color:var(--shelf-muted);}
+.jd-bookshelf .jd-tab[aria-pressed=true]{color:var(--shelf-ink);font-weight:600;border-color:var(--shelf-line);border-bottom-color:currentColor;background:var(--shelf-panel);}
+.jd-bookshelf .jd-native-home{justify-self:end;margin:0;white-space:nowrap;}
+.jd-bookshelf .jd-input,.jd-shelf-dialog .jd-input{display:block;width:100%;min-width:0;padding:10px 12px;border:1px solid var(--shelf-line);border-radius:3px;background:var(--shelf-panel);color:var(--shelf-ink);font:14px/1.5 var(--shelf-font);box-shadow:none;}
+.jd-bookshelf .jd-search{grid-column:1/-1;max-width:none;margin:0;padding:9px 12px;}
+.jd-sort-control{position:relative;flex:0 0 auto;}
+.jd-bookshelf .jd-sort-toggle[aria-expanded=true]{border-color:var(--shelf-line);}
+.jd-sort-menu{position:absolute;inset:calc(100% + 5px) auto auto 0;z-index:5;width:164px;max-width:calc(100vw - 32px);max-height:min(260px,calc(100dvh - 140px));overflow:auto;padding:5px;border:1px solid var(--shelf-line);border-radius:5px;background:var(--shelf-panel);box-shadow:0 6px 22px rgba(0,0,0,.16);}
+.jd-sort-menu[hidden]{display:none!important;}
+@supports(color:rgb(from red r g b)){
+  .jd-sort-menu{background:rgb(from var(--shelf-panel) r g b / .96);}
+}
+.jd-bookshelf .jd-sort-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:40px;margin:0;padding:8px 10px;border:0;border-radius:3px;background:none;text-align:left;color:var(--shelf-muted);font:13px/1.5 var(--shelf-font);white-space:nowrap;}
+.jd-bookshelf .jd-sort-option:hover,.jd-bookshelf .jd-sort-option:focus-visible{background:var(--shelf-inset);outline-offset:-2px;}
+.jd-sort-mark{visibility:hidden;}
+.jd-sort-option[aria-checked=true] .jd-sort-mark{visibility:visible;}
+.jd-input::placeholder{color:var(--shelf-muted);opacity:1;}
+.jd-shelf-info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:4px 0 10px;color:var(--shelf-muted);font-size:12px;}
+.jd-shelf-info>.jd-text-button{margin-left:auto;}
+.jd-card-tally{padding-inline-start:.35em;}
+.jd-bookshelf .jd-add-character{display:inline-flex;align-items:center;justify-content:center;flex:0 0 26px;width:26px;min-width:26px;height:28px;min-height:28px;margin:0 0 0 -7px;padding:0;border:0;background:none;color:var(--shelf-muted);font:15px/1 system-ui,sans-serif;}
+.jd-bookshelf .jd-add-character i{font-size:15px;}
+.jd-bookshelf .jd-add-character:hover{color:var(--shelf-ink);}
+.jd-bookshelf .jd-add-character:focus-visible{outline-offset:2px;}
+.jd-sort-status{font-size:11px;}
+.jd-shelf-notice{margin:0;color:var(--shelf-ink);font-size:13px;line-height:1.7;}
+.jd-shelf-notice:not(:empty){margin:12px 0;}
+.jd-story-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 17px;align-items:start;}
+.jd-story-card{position:relative;min-width:0;border:1px solid var(--shelf-soft-line,var(--shelf-line));border-radius:5px;background:var(--shelf-panel);overflow:hidden;box-shadow:none!important;}
+.jd-story-card:focus-within,.jd-story-card:hover{border-color:var(--shelf-accent);}
+.jd-bookshelf .jd-open-card{display:block;width:100%;margin:0;padding:0;border:0;background:none;text-align:left;overflow:hidden;}
+.jd-cover{position:relative;display:block;width:100%;aspect-ratio:3/4;overflow:hidden;background:var(--shelf-inset);border-bottom:1px solid var(--shelf-soft-line,var(--shelf-line));}
+.jd-cover img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:50% 25%;border-radius:0;box-shadow:none;filter:none;}
+.jd-cover-letter{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:50px;font-weight:400;letter-spacing:.1em;color:var(--shelf-ink);}
+.jd-cover-letter::before,.jd-cover-letter::after{content:"";position:absolute;width:52%;height:55%;border:1px solid var(--shelf-line);}
+.jd-cover-letter::after{width:45%;height:64%;}
+.jd-save-count{position:absolute;left:10px;bottom:10px;padding:3px 8px;border:1px solid var(--shelf-line);border-radius:3px;background:var(--shelf-panel);color:var(--shelf-ink);font-size:11px;line-height:1.6;z-index:1;}
+.jd-card-tools{position:absolute;top:8px;right:8px;display:flex;gap:5px;z-index:2;}
+.jd-bookshelf .jd-icon-button,.jd-shelf-dialog .jd-icon-button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:32px;min-height:32px;margin:0;padding:0 6px;border:1px solid var(--shelf-line);border-radius:3px;background:var(--shelf-panel);font:19px/1.3 system-ui,sans-serif;color:var(--shelf-muted);}
+.jd-bookshelf .jd-favorite[aria-pressed=true],.jd-bookshelf .jd-icon-button:hover,.jd-shelf-dialog .jd-icon-button:hover{color:var(--shelf-ink);border-color:currentColor;}
+.jd-bookshelf .jd-pin[aria-pressed=true]{color:var(--shelf-ink);border-color:currentColor;}
+.jd-pin[aria-pressed=true] svg path{fill:currentColor;fill-opacity:.22;}
+.jd-card-body{padding:14px 14px 12px;}
+.jd-card-body h3{margin:0 0 5px!important;font:400 22px/1.5 var(--shelf-font)!important;letter-spacing:.04em;color:var(--shelf-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.jd-card-tags{margin:0 0 13px!important;font-size:12px!important;line-height:1.6!important;min-height:1.6em;color:var(--shelf-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.jd-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:9px;border-top:1px solid var(--shelf-soft-line,var(--shelf-line));}
+.jd-last-played{font-size:11px;line-height:1.5;color:var(--shelf-muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.jd-card-action{flex-shrink:0;font-size:11px;line-height:1.5;color:var(--shelf-muted);}
+.jd-empty{grid-column:1/-1;padding:45px 10px;color:var(--shelf-muted);text-align:center;font-size:14px;}
+.jd-shelf-dialog{width:min(620px,calc(100vw - 24px));max-width:calc(100vw - 24px);max-height:calc(100dvh - 32px);padding:0;margin:auto;border:1px solid var(--shelf-line);border-top:2px solid var(--shelf-accent);border-radius:5px;background:var(--shelf-panel);box-shadow:none!important;overflow:auto;scrollbar-width:thin;}
+.jd-shelf-dialog::backdrop{background:rgba(0,0,0,.65);}
+.jd-shelf-dialog.jd-shelf-wide{width:min(1180px,calc(100vw - 24px));}
+.jd-dialog-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 20px;background:var(--shelf-panel);border-bottom:1px solid var(--shelf-line);}
+.jd-dialog-head h2{margin:0!important;font:400 22px/1.4 var(--shelf-font)!important;color:var(--shelf-ink);}
+.jd-dialog-body{padding:18px 20px 22px;}
+.jd-shelf-dialog>.jd-shelf-notice:not(:empty){padding:0 20px 14px;margin:0;}
+.jd-shelf-wide>.jd-dialog-body{padding:0;}
+.jd-dialog-intro{margin:0 0 17px;font-size:13px;color:var(--shelf-muted);line-height:1.7;}
+.jd-save-list{display:flex;flex-direction:column;gap:9px;}
+.jd-shelf-dialog.jd-archives-dialog{width:min(760px,calc(100vw - 24px));}
+.jd-save-row{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--shelf-line);border-radius:3px;background:var(--shelf-inset);}
+.jd-shelf-dialog .jd-open-chat{flex:1;display:block;min-width:0;padding:0;border:0;background:none;text-align:left;}
+.jd-open-chat strong{display:block;margin-bottom:5px;font-size:17px;font-weight:400;line-height:1.5;overflow-wrap:anywhere;color:var(--shelf-ink);}
+.jd-open-chat small{display:block;font-size:11px;line-height:1.7;color:var(--shelf-muted);font-variant-numeric:tabular-nums;}
+.jd-save-preview{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;max-height:5.1em;margin-top:9px;font-size:14px;line-height:1.7;color:var(--shelf-ink);font-weight:400;white-space:normal;overflow-wrap:anywhere;}
+.jd-save-preview.jd-preview-empty{font-size:12px;color:var(--shelf-muted);}
+.jd-archives-dialog .jd-save-row{position:relative;align-items:flex-start;padding:14px;}
+.jd-archives-dialog .jd-open-chat>strong,.jd-archives-dialog .jd-open-chat>small{padding-right:78px;}
+.jd-archives-dialog .jd-save-tools{position:absolute;top:14px;right:14px;display:flex;gap:5px;}
+.jd-shelf-dialog .jd-delete-chat{font-size:13px;}
+.jd-save-row:hover{border-color:var(--shelf-accent);}
+.jd-dialog-footer{display:flex;justify-content:flex-end;margin-top:20px;}
+.jd-shelf-dialog .jd-primary-button{display:block;margin:18px 0 0 auto;padding:9px 15px;border:1px solid var(--shelf-line);border-radius:3px;background:var(--shelf-inset);color:var(--shelf-ink);font-size:14px;line-height:1.5;}
+.jd-delete-name{display:block;margin:0 0 8px;font-size:18px;overflow-wrap:anywhere;}
+.jd-delete-file{margin:0 0 16px;font-size:12px;color:var(--shelf-muted);overflow-wrap:anywhere;}
+.jd-delete-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+.jd-shelf-dialog .jd-delete-actions button{margin:0;padding:9px 15px;min-height:42px;border:1px solid var(--shelf-line);border-radius:3px;font-size:14px;line-height:1.5;}
+.jd-shelf-dialog .jd-secondary-button{background:none;color:var(--shelf-muted);}
+.jd-shelf-dialog .jd-delete-confirm{color:var(--shelf-ink);border-color:currentColor;}
+.jd-shelf-dialog .jd-delete-character{margin-left:auto;}
+.jd-cover-actions{display:flex;justify-content:flex-start;align-items:center;min-height:38px;margin:4px 0 2px;}
+.jd-shelf-dialog .jd-replace-avatar{color:var(--shelf-muted);}
+.jd-crop-preview{width:min(100%,320px,34dvh);margin:0 auto 18px;border:1px solid var(--shelf-line);border-radius:3px;}
+.jd-crop-label{display:grid;grid-template-columns:5em minmax(0,1fr);align-items:center;gap:14px;margin:14px 0;font-size:13px;}
+.jd-crop-label input{width:100%;accent-color:var(--shelf-ink);}
+#jd-bookshelf-open[aria-disabled="true"]{opacity:.55;cursor:wait;}
+#jd-bookshelf-settings-content>small{display:block;margin:8px 0;}
+#jd-bookshelf-settings-content>.jd-install-status{color:var(--SmartThemeEmColor);}
+#jd-bookshelf-settings .menu_button{width:auto;}
+@container(min-width:1050px){.jd-story-grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
+@container(max-width:650px){
+  .jd-story-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 12px;}
+  .jd-shelf-toolbar{gap:9px 8px;}
+  .jd-bookshelf .jd-tab{padding:5px 8px;font-size:13px;}
+  .jd-bookshelf .jd-search{font-size:16px;}
+  .jd-card-body{padding:11px 10px 10px;}
+  .jd-card-body h3{font-size:19px!important;}
+  .jd-card-tags{font-size:11px!important;margin-bottom:10px!important;}
+  .jd-card-bottom{flex-wrap:wrap;gap:3px 8px;}
+  .jd-card-action{margin-left:auto;}
+}
+@media(max-width:650px){
+  .jd-card-tools{top:6px;right:6px;gap:4px;}
+  .jd-bookshelf .jd-card-tools .jd-icon-button{position:relative;width:26px;height:26px;min-width:26px;min-height:26px;padding:0;border-radius:3px;font-size:16px;}
+  .jd-card-tools .jd-icon-button svg{width:15px;height:15px;}
+  .jd-card-tools .jd-icon-button::after{content:"";position:absolute;inset:-2px;}
+  .jd-save-preview{-webkit-line-clamp:4;line-clamp:4;max-height:6.8em;}
+  .jd-bookshelf{padding:calc(12px + var(--jd-home-inset-top,0px)) 12px calc(24px + var(--jd-home-inset-bottom,0px));}
+  .jd-story-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 12px;}
+  .jd-dialog-head{padding:13px 15px;}
+  .jd-dialog-body{padding:16px 14px 20px;}
+  .jd-shelf-dialog .jd-input{font-size:16px;}
+  .jd-shelf-wide .jd-bookshelf{padding:12px 12px 24px;}
+  .jd-shelf-dialog{max-height:calc(100dvh - 24px);}
+  .jd-cover img{content-visibility:auto;}
+}
+@media(prefers-reduced-motion:reduce){.jd-bookshelf *,.jd-shelf-dialog *{scroll-behavior:auto!important;}}
+
+/* Archive-only new-chat entry. */
+.jd-archive-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 14px;margin-bottom:16px;}
+.jd-archive-toolbar>.jd-dialog-intro{margin:0;}
+.jd-shelf-dialog .jd-archive-toolbar>.jd-new-chat{min-height:40px;flex-shrink:0;color:var(--shelf-ink);font-size:14px;}
+.jd-loading{margin:10px 0 24px;font-size:14px;color:var(--shelf-muted);}
+.jd-dialog-footer{justify-content:space-between;flex-wrap:wrap;gap:8px 20px;}
+
+/* Folders stay behind one menu; bulk controls exist only while organizing. */
+.jd-bookshelf [hidden]{display:none!important;}
+.jd-folder-control{position:relative;min-width:0;}
+.jd-bookshelf .jd-folder-toggle{max-width:clamp(80px,22vw,180px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
+.jd-folder-menu{position:absolute;inset:calc(100% + 5px) auto auto 0;z-index:6;width:228px;max-width:calc(100vw - 52px);max-height:min(340px,60dvh);overflow:auto;padding:5px;border:1px solid var(--shelf-line);border-radius:5px;background:var(--shelf-panel);box-shadow:0 6px 22px rgba(0,0,0,.16);}
+@supports(color:rgb(from red r g b)){.jd-folder-menu{background:rgb(from var(--shelf-panel) r g b / .98);}}
+.jd-bookshelf .jd-folder-option,.jd-shelf-dialog .jd-folder-option{display:block;width:100%;min-height:42px;margin:0;padding:9px 10px;border:0;border-radius:3px;background:none;color:var(--shelf-ink);font:14px/1.5 var(--shelf-font);text-align:left;overflow-wrap:anywhere;}
+.jd-folder-option[aria-pressed=true],.jd-folder-option:hover,.jd-folder-option:focus-visible,.jd-folder-option.jd-drop-target{background:var(--shelf-inset);outline-offset:-2px;}
+.jd-folder-option[aria-pressed=true]{font-weight:600;}
+.jd-folder-option.jd-drop-target{outline:2px solid var(--shelf-ink);outline-offset:-2px;}
+.jd-folder-actions{border-top:1px solid var(--shelf-line);margin-top:4px;padding-top:4px;}
+.jd-folder-section-label{margin:5px 4px 2px;padding:8px 6px 4px;border-top:1px solid var(--shelf-line);color:var(--shelf-muted);font-size:11px;line-height:1.5;}
+.jd-tag-option{padding-left:16px!important;}
+.jd-shelf-info>.jd-organize{margin-left:auto;}
+.jd-shelf-info>.jd-organize~.jd-text-button{margin-left:0;}
+.jd-organizer-bar{display:flex;align-items:center;flex-wrap:wrap;gap:4px 18px;padding:7px 10px;margin:0 0 12px;border:1px solid var(--shelf-line);border-radius:3px;background:var(--shelf-panel);font-size:12px;}
+.jd-organizer-bar>.jd-text-button:last-child{margin-left:auto;}
+.jd-bookshelf .jd-organizer-bar>.jd-text-button{min-height:36px;}
+.jd-selected-count{font-variant-numeric:tabular-nums;}
+.jd-select-card{display:none!important;}
+.jd-organizing .jd-card-tools{display:none;}
+.jd-organizing .jd-select-card{position:absolute;top:8px;left:8px;display:flex!important;align-items:center;justify-content:center;width:22px;height:22px;min-width:22px;min-height:22px;margin:0;padding:0;border:1px solid rgba(255,248,240,.34);border-radius:999px;background:rgba(16,14,13,.38);color:rgba(255,248,240,.92);font:600 12px/1 var(--shelf-font);z-index:3;box-shadow:0 4px 14px rgba(0,0,0,.16),inset 0 0 0 1px rgba(255,255,255,.025);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease,box-shadow .16s ease;}
+.jd-organizing .jd-selected{outline:1px solid rgba(242,218,184,.46);outline-offset:-1px;box-shadow:0 0 0 1px rgba(242,218,184,.055),0 8px 22px rgba(0,0,0,.10)!important;}
+.jd-organizing .jd-assistant-card{opacity:.55;pointer-events:none;}
+.jd-dragging{opacity:.6;}
+.jd-open-card{-webkit-touch-callout:none;user-select:none;touch-action:pan-y;}
+.jd-pager{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px 16px;margin-top:20px;padding-top:12px;border-top:1px solid var(--shelf-line);font-size:12px;color:var(--shelf-muted);}
+.jd-pager>.jd-text-button{min-height:40px;}
+.jd-page-label{font-variant-numeric:tabular-nums;}
+.jd-bookshelf .jd-page-size{width:auto;min-height:36px;margin:0;padding:4px 8px;border:1px solid var(--shelf-line);border-radius:3px;background:var(--shelf-panel);color:var(--shelf-ink);font:12px/1.5 var(--shelf-font);}
+.jd-page-size:focus-visible{outline:2px solid var(--shelf-ink);outline-offset:2px;}
+.jd-move-list{display:flex;flex-direction:column;gap:4px;}
+@media(max-width:650px){.jd-folder-toggle{max-width:100px!important;}.jd-pager{gap:4px 12px;}.jd-organizer-bar{gap:4px 12px;}.jd-shelf-info>.jd-text-button{min-height:36px;}}
+
+/* Version management stays in a compact, theme-following settings dialog. */
+.jd-version-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;}
+.jd-version-actions button{flex:1 1 140px;min-width:0;}
+.jd-version-source{display:grid;gap:8px;margin-bottom:14px;}
+.jd-version-source input{width:100%;min-width:0;}
+.jd-version-notes{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;}
+.jd-version-help{display:block;color:var(--shelf-muted);font-size:12px;}
+#jd-bookshelf-settings .jd-version-open{margin-top:10px;}
+
+/* ===== DevilDw2 homepage gallery polish ===== */
+/* Refined gallery skin. Visual-only: no card/archive behavior is changed. */
+.jd-bookshelf{
+  --jd-gallery-warm:214,206,200;
+  --jd-gallery-card-bg:rgba(18,16,14,.115);
+  --jd-gallery-card-line:rgba(255,255,255,.075);
+  --jd-gallery-card-line-hover:rgba(235,222,203,.26);
+  --jd-gallery-tool-bg:rgba(14,12,11,.42);
+  --jd-gallery-tool-line:rgba(255,255,255,.105);
+}
+
+/* Top controls: quieter, lighter, and less like a settings panel. */
+.jd-shelf-toolbar{
+  gap:8px 10px;
+}
+
+.jd-bookshelf .jd-tab{
+  min-height:32px;
+  padding:4px 9px;
+  border:1px solid transparent;
+  border-radius:999px;
+  background:transparent;
+  font-size:12px;
+  color:var(--shelf-ink);
+  opacity:.58;
+}
+
+.jd-bookshelf .jd-tab[aria-pressed=true]{
+  border-color:rgba(var(--jd-gallery-warm),.13);
+  background:rgba(var(--jd-gallery-warm),.055);
+  color:var(--shelf-ink);
+  font-weight:500;
+  opacity:1;
+}
+
+.jd-bookshelf .jd-native-home{
+  opacity:.68;
+}
+
+.jd-bookshelf .jd-search{
+  min-height:36px;
+  padding:8px 11px;
+  border:1px solid rgba(var(--jd-gallery-warm),.13)!important;
+  border-radius:11px!important;
+  background:rgba(var(--jd-gallery-warm),.05)!important;
+  color:var(--shelf-ink)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important;
+  backdrop-filter:blur(7px) saturate(104%);
+  -webkit-backdrop-filter:blur(7px) saturate(104%);
+}
+
+.jd-bookshelf .jd-search::placeholder{
+  color:var(--shelf-ink)!important;
+  opacity:.42!important;
+}
+
+.jd-shelf-info{
+  gap:5px 10px;
+  margin:6px 2px 12px;
+  font-size:11px;
+  opacity:.78;
+}
+
+.jd-shelf-info>.jd-text-button{
+  min-height:28px;
+  padding:3px 0;
+  font-size:11px;
+}
+
+/* Gallery proportions. Desktop keeps four across; smaller views use three. */
+.jd-story-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:15px 12px;
+}
+
+.jd-story-card{
+  position:relative;
+  border:1px solid var(--jd-gallery-card-line);
+  border-radius:11px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.018),rgba(0,0,0,.055)),
+    var(--jd-gallery-card-bg);
+  box-shadow:0 7px 20px rgba(0,0,0,.075)!important;
+  overflow:hidden;
+  transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease;
+}
+
+.jd-story-card:hover,
+.jd-story-card:focus-within{
+  border-color:var(--jd-gallery-card-line-hover);
+  transform:translateY(-2px);
+  box-shadow:0 10px 26px rgba(0,0,0,.12)!important;
+}
+
+.jd-cover{
+  aspect-ratio:3/4;
+  border-bottom:1px solid rgba(255,255,255,.045);
+  background:rgba(255,255,255,.018);
+}
+
+.jd-cover::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:25%;
+  pointer-events:none;
+  background:linear-gradient(to top,rgba(8,7,6,.22),transparent);
+  z-index:0;
+}
+
+.jd-cover img{
+  object-position:50% 22%;
+  transition:transform .28s ease;
+}
+
+.jd-story-card:hover .jd-cover img{
+  transform:scale(1.012);
+}
+
+/* Cover actions float over the art without becoming the visual focus. */
+.jd-card-tools{
+  top:6px;
+  right:6px;
+  gap:3px;
+}
+
+.jd-bookshelf .jd-card-tools .jd-icon-button{
+  width:25px;
+  height:25px;
+  min-width:25px;
+  min-height:25px;
+  padding:0;
+  border:1px solid var(--jd-gallery-tool-line);
+  border-radius:7px;
+  background:var(--jd-gallery-tool-bg);
+  color:rgba(255,255,255,.62);
+  font-size:14px;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  transition:color .16s ease,border-color .16s ease,background .16s ease,transform .16s ease;
+}
+
+.jd-bookshelf .jd-card-tools .jd-icon-button:hover,
+.jd-bookshelf .jd-card-tools .jd-icon-button[aria-pressed=true]{
+  color:rgba(255,255,255,.95);
+  border-color:rgba(255,255,255,.22);
+  background:rgba(14,12,11,.58);
+  transform:translateY(-1px);
+}
+
+.jd-card-tools .jd-icon-button svg{
+  width:13px;
+  height:13px;
+}
+
+.jd-save-count{
+  left:6px;
+  bottom:6px;
+  padding:2px 6px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:999px;
+  background:rgba(14,12,11,.43);
+  color:rgba(255,255,255,.78);
+  font-size:9px;
+  line-height:1.45;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  z-index:2;
+}
+
+/* Typography is compact but still readable, with the cover staying dominant. */
+.jd-card-body{
+  padding:9px 9px 8px;
+}
+
+.jd-card-body h3{
+  margin:0 0 3px!important;
+  font-size:15px!important;
+  line-height:1.35!important;
+  letter-spacing:.025em!important;
+  font-weight:500!important;
+}
+
+.jd-card-tags{
+  min-height:1.35em;
+  margin:0 0 6px!important;
+  font-size:9.5px!important;
+  line-height:1.35!important;
+  opacity:.60;
+}
+
+.jd-card-bottom{
+  gap:6px;
+  padding-top:6px;
+  border-top:1px solid rgba(255,255,255,.045);
+}
+
+.jd-last-played,
+.jd-card-action{
+  font-size:8.5px;
+  line-height:1.4;
+}
+
+.jd-card-action{
+  color:var(--shelf-ink);
+  opacity:.68;
+}
+
+/* Pagination is deliberately quiet so it does not fight the background art. */
+.jd-pager{
+  margin-top:17px;
+  padding-top:6px;
+  border-top:0;
+  gap:5px 12px;
+  color:var(--shelf-ink);
+  font-size:10px;
+  opacity:.70;
+}
+
+.jd-bookshelf .jd-page-size{
+  width:auto;
+  min-height:29px;
+  padding:3px 10px;
+  border:1px solid rgba(var(--jd-gallery-warm),.13)!important;
+  border-radius:999px!important;
+  background:rgba(var(--jd-gallery-warm),.05)!important;
+  color:var(--shelf-ink)!important;
+  box-shadow:none!important;
+  font-size:9.5px!important;
+  line-height:1.4!important;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+
+.jd-bookshelf .jd-page-size:focus-visible{
+  outline:1px solid rgba(var(--jd-gallery-warm),.32);
+  outline-offset:2px;
+}
+
+@container(max-width:900px){
+  .jd-story-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px 9px;
+  }
+}
+
+@container(max-width:650px){
+  .jd-bookshelf{
+    padding:calc(11px + var(--jd-home-inset-top,0px)) 10px calc(22px + var(--jd-home-inset-bottom,0px));
+  }
+
+  .jd-shelf-toolbar{
+    gap:7px 7px;
+  }
+
+  .jd-bookshelf .jd-tab{
+    min-height:30px;
+    padding:3px 7px;
+    font-size:11px;
+  }
+
+  .jd-bookshelf .jd-search{
+    min-height:34px;
+    padding:7px 10px!important;
+    border-radius:10px!important;
+    font-size:13px!important;
+  }
+
+  .jd-shelf-info{
+    margin:5px 1px 10px;
+    font-size:10px;
+  }
+
+  .jd-story-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:11px 8px;
+  }
+
+  .jd-story-card{
+    border-radius:10px;
+    box-shadow:0 5px 14px rgba(0,0,0,.065)!important;
+  }
+
+  .jd-story-card:hover,
+  .jd-story-card:focus-within{
+    transform:none;
+  }
+
+  .jd-card-tools{
+    top:4px;
+    right:4px;
+    gap:2px;
+  }
+
+  .jd-bookshelf .jd-card-tools .jd-icon-button{
+    width:22px;
+    height:22px;
+    min-width:22px;
+    min-height:22px;
+    border-radius:6px;
+  }
+
+  .jd-card-tools .jd-icon-button svg{
+    width:11px;
+    height:11px;
+  }
+
+  .jd-save-count{
+    left:4px;
+    bottom:4px;
+    padding:1px 5px;
+    font-size:8px;
+  }
+
+  .jd-card-body{
+    padding:7px 6px 6px;
+    text-align:center;
+  }
+
+  .jd-card-body h3{
+    margin:0 0 2px!important;
+    font-size:12.5px!important;
+    line-height:1.3!important;
+    letter-spacing:.015em!important;
+    text-align:center;
+  }
+
+  .jd-card-tags{
+    margin:0 0 5px!important;
+    font-size:8.5px!important;
+    line-height:1.3!important;
+    text-align:center;
+    opacity:.57;
+  }
+
+  .jd-card-bottom{
+    display:block;
+    padding-top:4px;
+    text-align:center;
+  }
+
+  .jd-last-played{
+    display:none;
+  }
+
+  .jd-card-action{
+    display:block;
+    width:100%;
+    margin:0;
+    font-size:8.5px;
+    line-height:1.35;
+    text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    opacity:.66;
+  }
+
+  .jd-pager{
+    margin-top:14px;
+    gap:4px 10px;
+  }
+
+  .jd-bookshelf .jd-page-size{
+    min-height:27px;
+    padding:3px 9px;
+    font-size:9px!important;
+  }
+}
+
+@media(max-width:650px){
+  .jd-story-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:11px 8px;
+  }
+}
+
+/* Respect reduced-motion preferences even for this skin. */
+@media(prefers-reduced-motion:reduce){
+  .jd-story-card,
+  .jd-cover img,
+  .jd-bookshelf .jd-card-tools .jd-icon-button{
+    transition:none!important;
+    transform:none!important;
+  }
+}
+
+/* ===== DevilDw2 dialog glass polish ===== */
+.jd-shelf-dialog{
+  border:1px solid rgba(214,206,200,.16)!important;
+  border-top:1px solid rgba(235,222,203,.30)!important;
+  border-radius:14px!important;
+  background:rgba(22,19,17,.72)!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.34)!important;
+  backdrop-filter:blur(18px) saturate(108%);
+  -webkit-backdrop-filter:blur(18px) saturate(108%);
+}
+
+.jd-shelf-dialog::backdrop{
+  background:rgba(0,0,0,.44)!important;
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+}
+
+.jd-dialog-head{
+  padding:14px 18px;
+  background:rgba(214,206,200,.05)!important;
+  border-bottom:1px solid rgba(214,206,200,.12)!important;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+
+.jd-dialog-head h2{
+  font-size:20px!important;
+  font-weight:500!important;
+  letter-spacing:.03em;
+}
+
+.jd-dialog-body{
+  padding:16px 18px 20px;
+}
+
+.jd-dialog-intro{
+  color:var(--shelf-ink);
+  opacity:.72;
+}
+
+.jd-save-list{
+  gap:10px;
+}
+
+.jd-save-row{
+  border:1px solid rgba(214,206,200,.13)!important;
+  border-radius:10px!important;
+  background:rgba(214,206,200,.10)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.jd-save-row:hover{
+  border-color:rgba(235,222,203,.24)!important;
+  background:rgba(214,206,200,.13)!important;
+}
+
+.jd-open-chat strong{
+  font-weight:500;
+  letter-spacing:.015em;
+}
+
+.jd-open-chat small{
+  color:var(--shelf-ink);
+  opacity:.52;
+}
+
+.jd-save-preview{
+  color:var(--shelf-ink);
+  opacity:.88;
+}
+
+.jd-save-preview.jd-preview-empty{
+  color:var(--shelf-ink);
+  opacity:.48;
+}
+
+.jd-archives-dialog .jd-save-tools{
+  gap:6px;
+}
+
+.jd-shelf-dialog .jd-icon-button{
+  border:1px solid rgba(214,206,200,.14)!important;
+  border-radius:8px!important;
+  background:rgba(214,206,200,.07)!important;
+  color:var(--shelf-ink)!important;
+  opacity:.78;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+
+.jd-shelf-dialog .jd-icon-button:hover{
+  border-color:rgba(235,222,203,.26)!important;
+  background:rgba(214,206,200,.10)!important;
+  opacity:1;
+}
+
+.jd-archive-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+
+.jd-archive-toolbar > :first-child{
+  flex:1 1 auto;
+  min-width:0;
+}
+
+.jd-shelf-dialog .jd-archive-toolbar>.jd-new-chat,
+.jd-shelf-dialog .jd-primary-button,
+.jd-shelf-dialog .jd-delete-actions button{
+  border:1px solid rgba(214,206,200,.15)!important;
+  border-radius:9px!important;
+  background:rgba(214,206,200,.08)!important;
+  color:var(--shelf-ink)!important;
+}
+
+.jd-shelf-dialog .jd-archive-toolbar>.jd-new-chat{
+  margin-left:auto;
+  flex:0 0 auto;
+  white-space:nowrap;
+  padding:10px 14px!important;
+}
+
+.jd-shelf-dialog .jd-primary-button:hover,
+.jd-shelf-dialog .jd-delete-actions button:hover,
+.jd-shelf-dialog .jd-archive-toolbar>.jd-new-chat:hover{
+  border-color:rgba(235,222,203,.25)!important;
+  background:rgba(214,206,200,.11)!important;
+}
+
+.jd-dialog-footer{
+  padding-top:2px;
+}
+
+@media(max-width:650px){
+  .jd-shelf-dialog{
+    width:min(94vw,760px);
+    max-width:94vw;
+    border-radius:12px!important;
+    background:rgba(22,19,17,.78)!important;
+  }
+
+  .jd-dialog-head{
+    padding:12px 14px;
+  }
+
+  .jd-dialog-head h2{
+    font-size:18px!important;
+  }
+
+  .jd-dialog-body{
+    padding:14px 13px 17px;
+  }
+
+  .jd-archives-dialog .jd-save-row{
+    padding:12px;
+    border-radius:9px!important;
+  }
+
+  .jd-shelf-dialog .jd-archive-toolbar>.jd-new-chat{
+    padding:8px 12px!important;
+    font-size:13px!important;
+  }
+}
+
+/* ===== DevilDw2 card typography polish ===== */
+/* Noto Serif SC remains the primary face; fallbacks keep iOS/Android stable. */
+.jd-bookshelf,
+.jd-shelf-dialog{
+  --shelf-font:"Noto Serif SC","Songti SC","STSong","Source Han Serif SC","Noto Serif CJK SC",serif;
+}
+
+/* Information panel: warm smoked glass, slightly firmer at the bottom. */
+.jd-card-body{
+  position:relative;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18,16,15,.22) 0%,
+      rgba(18,16,15,.36) 48%,
+      rgba(15,13,12,.53) 100%
+    );
+  border-top:1px solid rgba(255,255,255,.045);
+}
+
+/* Character name = primary editorial line. */
+.jd-card-body h3{
+  color:rgba(255,250,246,.99)!important;
+  font-weight:600!important;
+  letter-spacing:.045em!important;
+  text-shadow:0 1px 5px rgba(0,0,0,.34)!important;
+}
+
+/* Story/tag line = readable information, not decorative haze. */
+.jd-card-tags{
+  color:rgba(241,234,227,.91)!important;
+  font-weight:500!important;
+  letter-spacing:.035em!important;
+  opacity:1!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.25)!important;
+}
+
+/* Archive action = tertiary editorial link. */
+.jd-card-action{
+  display:inline-flex;
+  align-items:center;
+  width:auto!important;
+  color:rgba(235,226,217,.78)!important;
+  font-weight:500!important;
+  letter-spacing:.055em!important;
+  opacity:1!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.20)!important;
+}
+
+/* Selected tools get a warm ivory-gold cue; inactive tools stay quiet. */
+.jd-bookshelf .jd-pin:not([aria-pressed="true"]),
+.jd-bookshelf .jd-favorite:not([aria-pressed="true"]){
+  color:rgba(255,255,255,.50)!important;
+  border-color:rgba(255,255,255,.075)!important;
+  background:rgba(14,12,11,.34)!important;
+}
+
+.jd-bookshelf .jd-pin[aria-pressed="true"],
+.jd-bookshelf .jd-favorite[aria-pressed="true"]{
+  color:rgba(242,218,184,.98)!important;
+  border-color:rgba(242,218,184,.28)!important;
+  background:rgba(112,86,58,.26)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,244,226,.035)!important;
+}
+
+/* Save-count pill becomes a finer label instead of a button-like badge. */
+.jd-save-count{
+  border-color:rgba(255,255,255,.085);
+  background:rgba(14,12,11,.38);
+  color:rgba(246,238,230,.78);
+  letter-spacing:.02em;
+}
+
+/* Archive dialog typography follows the same editorial hierarchy. */
+.jd-open-chat strong{
+  color:rgba(255,250,246,.97);
+  font-weight:600;
+  letter-spacing:.025em;
+}
+
+.jd-open-chat small{
+  color:rgba(235,226,217,.62)!important;
+  opacity:1!important;
+}
+
+.jd-save-preview{
+  color:rgba(244,237,230,.86)!important;
+  font-weight:400;
+  line-height:1.75;
+}
+
+@container(max-width:650px){
+  .jd-card-body{
+    padding:8px 8px 7px;
+    text-align:left;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(18,16,15,.24) 0%,
+        rgba(18,16,15,.40) 50%,
+        rgba(15,13,12,.56) 100%
+      );
+  }
+
+  .jd-card-body h3{
+    margin:0 0 3px!important;
+    font-size:13.2px!important;
+    line-height:1.34!important;
+    text-align:left!important;
+  }
+
+  .jd-card-tags{
+    margin:0 0 6px!important;
+    font-size:9.2px!important;
+    line-height:1.45!important;
+    text-align:left!important;
+  }
+
+  .jd-card-bottom{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    padding-top:7px;
+    border-top:0;
+    text-align:left;
+  }
+
+  .jd-card-bottom::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:26px;
+    height:1px;
+    background:linear-gradient(90deg,rgba(242,218,184,.30),rgba(242,218,184,.04));
+  }
+
+  .jd-last-played{
+    display:block!important;
+    flex:1 1 auto;
+    min-width:0;
+    margin:0;
+    color:rgba(235,226,217,.62)!important;
+    font-size:8.7px!important;
+    line-height:1.35!important;
+    font-weight:500!important;
+    letter-spacing:.025em;
+    text-align:left!important;
+    opacity:1!important;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .jd-card-action{
+    flex:0 0 auto;
+    margin:0;
+    padding:0 0 1px;
+    font-size:8.8px!important;
+    line-height:1.35!important;
+    text-align:right!important;
+  }
+
+  .jd-save-count{
+    left:4px;
+    bottom:4px;
+    padding:1px 4px;
+    font-size:7.8px;
+    border-radius:999px;
+  }
+
+  .jd-bookshelf .jd-card-tools .jd-icon-button{
+    width:21px;
+    height:21px;
+    min-width:21px;
+    min-height:21px;
+  }
+
+  .jd-card-tools .jd-icon-button svg{
+    width:10.5px;
+    height:10.5px;
+  }
+
+  .jd-open-chat strong{
+    font-size:15.5px;
+    line-height:1.45;
+  }
+
+  .jd-open-chat small{
+    font-size:10px;
+  }
+
+  .jd-save-preview{
+    margin-top:8px;
+    font-size:12.5px;
+    line-height:1.7;
+  }
+}
+/* ===== /DevilDw2 card typography polish ===== */
+
+/* ===== DevilDw2 archive fixed-height scroll ===== */
+/* Archive dialogs keep a stable viewport height; only the save list scrolls. */
+.jd-shelf-dialog.jd-archives-dialog[open]{
+  display:flex;
+  flex-direction:column;
+  width:min(760px,calc(100vw - 24px));
+  height:min(72dvh,700px);
+  max-height:calc(100dvh - 28px);
+  overflow:hidden!important;
+}
+
+.jd-archives-dialog .jd-dialog-head{
+  position:relative;
+  top:auto;
+  flex:0 0 auto;
+}
+
+.jd-archives-dialog .jd-dialog-body{
+  display:flex;
+  flex:1 1 auto;
+  min-height:0;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.jd-archives-dialog .jd-archive-toolbar{
+  flex:0 0 auto;
+}
+
+.jd-archives-dialog .jd-save-list{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(235,222,203,.24) transparent;
+}
+
+.jd-archives-dialog .jd-save-list::-webkit-scrollbar{
+  width:4px;
+}
+
+.jd-archives-dialog .jd-save-list::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+.jd-archives-dialog .jd-save-list::-webkit-scrollbar-thumb{
+  background:rgba(235,222,203,.22);
+  border-radius:999px;
+}
+
+.jd-archives-dialog .jd-dialog-footer{
+  flex:0 0 auto;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid rgba(214,206,200,.08);
+  background:transparent;
+}
+
+.jd-archives-dialog > .jd-shelf-notice{
+  flex:0 0 auto;
+}
+
+@media(max-width:650px){
+  .jd-shelf-dialog.jd-archives-dialog[open]{
+    width:min(94vw,760px);
+    height:min(76dvh,680px);
+    max-height:calc(100dvh - 24px);
+  }
+
+  .jd-archives-dialog .jd-dialog-body{
+    padding:14px 13px 12px;
+  }
+
+  .jd-archives-dialog .jd-save-list{
+    padding-right:2px;
+  }
+
+  .jd-archives-dialog .jd-dialog-footer{
+    margin-top:10px;
+    padding-top:8px;
+  }
+}
+
+
+
+/* ===== DevilDw2 organizer selection polish ===== */
+/* Compact circular selector: quieter when idle, warm ivory when chosen. */
+.jd-organizing .jd-select-card::after{
+  content:"";
+  position:absolute;
+  inset:-7px;
+  border-radius:999px;
+}
+
+.jd-organizing .jd-select-card[aria-checked="true"]{
+  border-color:rgba(242,218,184,.72)!important;
+  background:rgba(116,88,58,.72)!important;
+  color:rgba(255,249,241,.98)!important;
+  box-shadow:0 5px 16px rgba(0,0,0,.20),0 0 0 1px rgba(242,218,184,.08)!important;
+}
+
+.jd-organizing .jd-select-card:active{
+  transform:scale(.94);
+}
+
+@media(max-width:650px){
+  .jd-organizing .jd-select-card{
+    top:6px;
+    left:6px;
+    width:21px;
+    height:21px;
+    min-width:21px;
+    min-height:21px;
+    font-size:11px;
+  }
+}
+
+/* ===== DevilDw2 organizer bar polish ===== */
+/* The organizer action strip should match the archive's warm glass language,
+   not inherit the current theme's opaque panel color. */
+.jd-organizer-bar{
+  gap:5px 14px!important;
+  padding:8px 11px!important;
+  margin:0 0 12px!important;
+  border:1px solid rgba(214,206,200,.12)!important;
+  border-radius:11px!important;
+  background:rgba(214,206,200,.055)!important;
+  color:var(--shelf-ink)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.022)!important;
+  backdrop-filter:blur(8px) saturate(104%);
+  -webkit-backdrop-filter:blur(8px) saturate(104%);
+}
+
+.jd-selected-count{
+  color:rgba(242,234,226,.78)!important;
+  font-weight:500;
+  letter-spacing:.02em;
+}
+
+.jd-bookshelf .jd-organizer-bar>.jd-text-button{
+  min-height:30px!important;
+  padding:4px 2px!important;
+  color:rgba(239,231,223,.64)!important;
+  font-size:10.5px!important;
+  opacity:1!important;
+}
+
+.jd-bookshelf .jd-organizer-bar>.jd-text-button:hover,
+.jd-bookshelf .jd-organizer-bar>.jd-text-button:focus-visible{
+  color:rgba(255,249,242,.95)!important;
+}
+
+.jd-bookshelf .jd-organizer-bar>.jd-text-button:disabled{
+  color:rgba(235,226,217,.30)!important;
+  opacity:1!important;
+}
+
+.jd-bookshelf .jd-organizer-bar>.jd-text-button:last-child{
+  margin-left:auto!important;
+  padding-inline:8px!important;
+  border:1px solid rgba(242,218,184,.13)!important;
+  border-radius:999px!important;
+  background:rgba(242,218,184,.045)!important;
+  color:rgba(245,236,227,.82)!important;
+}
+
+.jd-bookshelf .jd-organizer-bar>.jd-text-button:last-child:hover{
+  border-color:rgba(242,218,184,.24)!important;
+  background:rgba(242,218,184,.075)!important;
+  color:rgba(255,249,242,.98)!important;
+}
+
+@media(max-width:650px){
+  .jd-organizer-bar{
+    gap:4px 10px!important;
+    padding:7px 9px!important;
+    border-radius:10px!important;
+  }
+
+  .jd-selected-count{
+    font-size:10px;
+  }
+
+  .jd-bookshelf .jd-organizer-bar>.jd-text-button{
+    min-height:28px!important;
+    font-size:10px!important;
+  }
+}
+
