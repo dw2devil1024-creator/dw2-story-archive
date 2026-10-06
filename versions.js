@@ -154,17 +154,48 @@ export function createVersionManager({ settings, save, flush, context, moduleURL
             busy = true;
             try {
                 const install = await resolveInstall();
-                if (!install.repository) throw new Error('尚未设置发布仓库。作者完成 GitHub 发布后，填入仓库网址即可检查更新。');
+                if (!install.repository) throw new Error('尚未设置发布仓库。');
+
+                // Native extensions use the same server-side Git check as SillyTavern's
+                // extension manager. This avoids a second client-side update detector
+                // disagreeing with the manager or silently failing on embedded WebViews.
+                if (install.mode === 'native') {
+                    install.branches = await native('branches', install);
+                    if (!Array.isArray(install.branches)) throw new Error('当前酒馆未返回可切换版本，请先更新酒馆。');
+                    checkAlive();
+
+                    const versions = install.branches
+                        .map(branch => {
+                            const match = String(branch.name || '').match(/^origin\/v(\d+\.\d+\.\d+)$/);
+                            return match ? { version: match[1], branch: `v${match[1]}`, commit: branch.commit, kind: 'rollback', notes: `切换到 V${match[1]} 固定版本。` } : null;
+                        })
+                        .filter(Boolean)
+                        .sort((a, b) => compareVersions(b.version, a.version));
+
+                    const previous = versions.find(release => compareVersions(release.version, currentVersion) < 0) || null;
+                    const needsMain = install.currentBranchName !== 'main';
+                    const hasRemoteUpdate = install.isUpToDate === false;
+                    const latest = (needsMain || hasRemoteUpdate)
+                        ? {
+                            version: 'latest',
+                            branch: 'main',
+                            kind: 'latest',
+                            notes: needsMain
+                                ? '当前停留在固定版本分支，可返回 main 主线最新版。'
+                                : 'GitHub 主分支检测到新提交，可直接更新到最新版。',
+                        }
+                        : null;
+
+                    return { install, catalog: null, latest, previous, unavailableLatest: false, checkedAt: Date.now() };
+                }
+
+                // Helper-script installs still use the published release catalog.
                 const client = await json(new URL('version', apiRoot).href, { cache: 'no-store' });
                 clientVersion = String(client?.pkgVersion || '').match(/\d+\.\d+\.\d+/)?.[0] || '';
                 if (!clientVersion) throw new Error('无法确认酒馆版本，暂不提供版本切换。');
                 const catalog = releaseCatalog(await remoteJSON(install.repository, 'versions.json'));
-                if (install.mode === 'native') {
-                    install.branches = await native('branches', install);
-                    if (!Array.isArray(install.branches)) throw new Error('当前酒馆未返回可切换版本，请先更新酒馆。');
-                }
                 checkAlive();
-                const available = catalog.releases.filter(release => compatible(release) && (install.mode === 'helper' || install.branches.some(branch => branch.name === `origin/${release.branch}`)));
+                const available = catalog.releases.filter(release => compatible(release));
                 const latest = available.find(release => release.version === catalog.latest);
                 const previous = available.find(release => compareVersions(release.version, currentVersion) < 0);
                 return { install, catalog, latest: latest && compareVersions(latest.version, currentVersion) > 0 ? latest : null, previous, unavailableLatest: compareVersions(catalog.latest, currentVersion) > 0 && !latest, checkedAt: Date.now() };
@@ -174,7 +205,9 @@ export function createVersionManager({ settings, save, flush, context, moduleURL
             if (busy) throw new Error('正在处理版本，请稍候。');
             if (reloadNeeded) throw new Error('版本已切换，请先刷新酒馆。');
             checkAlive();
-            if (!checked || Date.now() - checked.checkedAt > 10 * 60 * 1000 || ![checked.latest, checked.previous].includes(target) || !target || !compatible(target)) throw new Error('版本信息已过期或不兼容，请重新检查。');
+            const targetIsKnown = checked && [checked.latest, checked.previous].includes(target) && target;
+            const targetIsCompatible = targetIsKnown && (checked.install.mode === 'native' || compatible(target));
+            if (!checked || Date.now() - checked.checkedAt > 10 * 60 * 1000 || !targetIsCompatible) throw new Error('版本信息已过期或不兼容，请重新检查。');
             busy = true;
             let mutationStarted = false;
             try {
@@ -187,24 +220,40 @@ export function createVersionManager({ settings, save, flush, context, moduleURL
                 settings().versionBackup = versionSnapshot(settings(), currentVersion);
                 await flush();
                 checkAlive();
+                let appliedVersion = target.version;
                 if (install.mode === 'native') {
                     mutationStarted = true;
-                    await native('switch', install, { branch: `origin/${target.branch}` }, true);
-                    // Frozen version branches are verified instead of fast-forwarded silently.
-                    const [manifest, actual] = await Promise.all([
-                        json(new URL('manifest.json', moduleURL).href, { cache: 'no-store' }),
-                        native('version', install),
-                    ]);
-                    const expected = checked.install.branches.find(branch => branch.name === `origin/${target.branch}`);
-                    if (manifest?.version !== target.version || actual?.currentBranchName !== target.branch || !actual?.currentCommitHash?.startsWith(expected.commit)) throw new Error('切换后的版本未能通过核对，请刷新后检查扩展版本。');
+                    if (target.kind === 'latest') {
+                        // Match the built-in extension manager: return to main if needed,
+                        // then pull the remote main branch through the server-side updater.
+                        if (install.currentBranchName !== 'main') {
+                            await native('switch', install, { branch: 'origin/main' }, true);
+                        }
+                        await native('update', install, {}, true);
+                        const [manifest, actual] = await Promise.all([
+                            json(new URL('manifest.json', moduleURL).href, { cache: 'no-store' }),
+                            native('version', install),
+                        ]);
+                        if (actual?.currentBranchName !== 'main' || actual?.isUpToDate === false) throw new Error('主线更新未能通过核对，请刷新后在扩展管理中检查。');
+                        appliedVersion = VERSION_PATTERN.test(String(manifest?.version || '')) ? manifest.version : '最新版';
+                    } else {
+                        await native('switch', install, { branch: `origin/${target.branch}` }, true);
+                        // Frozen version branches are verified instead of fast-forwarded silently.
+                        const [manifest, actual] = await Promise.all([
+                            json(new URL('manifest.json', moduleURL).href, { cache: 'no-store' }),
+                            native('version', install),
+                        ]);
+                        const expected = checked.install.branches.find(branch => branch.name === `origin/${target.branch}`);
+                        if (!expected || manifest?.version !== target.version || actual?.currentBranchName !== target.branch || !actual?.currentCommitHash?.startsWith(expected.commit)) throw new Error('切换后的版本未能通过核对，请刷新后检查扩展版本。');
+                    }
                 } else {
                     mutationStarted = true;
                     helperAPI().updateScriptTreesWith(trees => patchHelperTrees(trees, helperId, install.script.content, replacement), { type: 'global' });
                     if (currentHelper().content !== replacement.content) throw new Error('助手脚本未能通过写入核对。');
                 }
-                const s = state(); s.repository = install.repository; s.previousVersion = currentVersion; s.chosenVersion = target.version;
+                const s = state(); s.repository = install.repository; s.previousVersion = currentVersion; s.chosenVersion = appliedVersion;
                 save(); await flush(); reloadNeeded = true;
-                return target.version;
+                return appliedVersion;
             } catch (error) {
                 if (mutationStarted) { reloadNeeded = true; throw new Error(`${error.message} 请刷新酒馆确认当前版本；书架设置备份已保留。`); }
                 throw error;
