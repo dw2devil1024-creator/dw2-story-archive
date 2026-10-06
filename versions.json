@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.5.3",
+  "latest": "1.5.4",
   "releases": [
+    {
+      "version": "1.5.4",
+      "branch": "v1.5.4",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.5.4-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "微调版本管理弹窗的版本号字号，使视觉层级更克制；用于验证 V1.5.3 起的新内置更新检测流程。"
+    },
     {
       "version": "1.5.3",
       "branch": "v1.5.3",
