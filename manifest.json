@@ -1,0 +1,16 @@
+{
+  "display_name": "DW2 · Story Archive",
+  "loading_order": 90,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "阿砚 · Codex · DW2 Custom",
+  "version": "1.4.4",
+  "minimum_client_version": "1.16.0",
+  "auto_update": false,
+  "hooks": {
+    "enable": "onEnable",
+    "disable": "onDisable"
+  }
+}
