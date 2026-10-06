@@ -1803,3 +1803,191 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   }
 }
 /* ===== /DW2 fixed dropdown glass · v1.5.9 ===== */
+
+/* ===== DW2 editorial dropdowns · v1.6.0 ===== */
+/* A quieter editorial treatment for the folder and sort popovers. */
+.jd-bookshelf .jd-folder-menu,
+.jd-bookshelf .jd-sort-menu{
+  padding:8px!important;
+  border:1px solid rgba(235,220,207,.12)!important;
+  border-top-color:rgba(255,244,234,.22)!important;
+  border-radius:14px!important;
+  background:
+    linear-gradient(180deg,rgba(52,45,40,.88),rgba(27,23,21,.94))!important;
+  box-shadow:
+    0 22px 54px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.02)!important;
+  backdrop-filter:blur(24px) saturate(108%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(108%)!important;
+}
+
+.jd-bookshelf .jd-folder-menu{
+  width:236px!important;
+}
+
+.jd-bookshelf .jd-sort-menu{
+  width:176px!important;
+}
+
+/* Menu rows */
+.jd-bookshelf .jd-folder-menu .jd-folder-option,
+.jd-bookshelf .jd-sort-menu .jd-sort-option{
+  position:relative;
+  min-height:38px!important;
+  padding:8px 11px 8px 14px!important;
+  border:0!important;
+  border-radius:9px!important;
+  background:transparent!important;
+  color:rgba(246,238,231,.64)!important;
+  font-size:12.5px!important;
+  font-weight:400!important;
+  line-height:1.45!important;
+  letter-spacing:.025em;
+  transition:
+    background .16s ease,
+    color .16s ease,
+    transform .16s ease!important;
+}
+
+/* Hover is intentionally much lighter than selection. */
+.jd-bookshelf .jd-folder-menu .jd-folder-option:hover,
+.jd-bookshelf .jd-folder-menu .jd-folder-option:focus-visible,
+.jd-bookshelf .jd-sort-menu .jd-sort-option:hover,
+.jd-bookshelf .jd-sort-menu .jd-sort-option:focus-visible{
+  background:rgba(255,255,255,.035)!important;
+  color:rgba(255,249,244,.88)!important;
+  transform:translateX(1px);
+  outline:0!important;
+}
+
+/* Selected state: thin warm line, no giant filled block. */
+.jd-bookshelf .jd-folder-menu .jd-folder-option[aria-pressed=true],
+.jd-bookshelf .jd-sort-menu .jd-sort-option[aria-checked=true]{
+  background:
+    linear-gradient(90deg,rgba(211,177,151,.085),rgba(255,255,255,.016) 72%,transparent)!important;
+  color:rgba(255,250,246,.94)!important;
+  font-weight:500!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-option[aria-pressed=true]::before,
+.jd-bookshelf .jd-sort-menu .jd-sort-option[aria-checked=true]::before{
+  content:"";
+  position:absolute;
+  left:4px;
+  top:9px;
+  bottom:9px;
+  width:1px;
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(244,220,198,.88),rgba(194,153,124,.40));
+  box-shadow:0 0 8px rgba(222,184,151,.18);
+}
+
+/* Refine the check into a tiny editorial mark. */
+.jd-bookshelf .jd-sort-menu .jd-sort-mark{
+  margin-left:10px;
+  color:rgba(232,202,178,.66)!important;
+  font-size:11px!important;
+  transform:translateY(-1px);
+}
+
+/* Section labels should read like quiet captions, not menu items. */
+.jd-bookshelf .jd-folder-menu .jd-folder-section-label,
+.jd-bookshelf .jd-folder-menu .jd-current-folder-label{
+  margin:7px 5px 4px!important;
+  padding:10px 7px 4px!important;
+  border-top:1px solid rgba(235,220,207,.08)!important;
+  color:rgba(244,236,229,.32)!important;
+  font-size:9.5px!important;
+  line-height:1.4!important;
+  font-weight:500;
+  letter-spacing:.14em!important;
+}
+
+/* Make tags visually secondary. */
+.jd-bookshelf .jd-folder-menu .jd-tag-option{
+  padding-left:20px!important;
+  color:rgba(246,238,231,.54)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-tag-option::after{
+  content:"";
+  position:absolute;
+  left:10px;
+  top:50%;
+  width:2px;
+  height:2px;
+  margin-top:-1px;
+  border-radius:50%;
+  background:rgba(223,196,174,.40);
+}
+
+/* Management tools are a restrained utility group, not part of the content list. */
+.jd-bookshelf .jd-folder-menu .jd-folder-actions{
+  margin-top:7px!important;
+  padding-top:7px!important;
+  border-top:1px solid rgba(235,220,207,.09)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-actions>.jd-folder-option{
+  min-height:35px!important;
+  padding-block:7px!important;
+  font-size:11.5px!important;
+  color:rgba(246,238,231,.50)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-actions>.jd-folder-option:hover,
+.jd-bookshelf .jd-folder-menu .jd-folder-actions>.jd-folder-option:focus-visible{
+  color:rgba(255,249,244,.82)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-delete{
+  color:rgba(229,194,184,.56)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-delete:hover,
+.jd-bookshelf .jd-folder-menu .jd-folder-delete:focus-visible{
+  color:rgba(255,222,211,.90)!important;
+  background:linear-gradient(90deg,rgba(122,69,56,.11),transparent)!important;
+}
+
+/* Drop target stays readable without shouting. */
+.jd-bookshelf .jd-folder-menu .jd-folder-option.jd-drop-target{
+  color:rgba(255,250,246,.94)!important;
+  background:rgba(209,174,147,.08)!important;
+  outline:1px solid rgba(224,190,162,.25)!important;
+  outline-offset:-2px!important;
+}
+
+/* Slightly softer scrollbars */
+.jd-bookshelf .jd-folder-menu,
+.jd-bookshelf .jd-sort-menu{
+  scrollbar-color:rgba(225,197,175,.16) transparent!important;
+}
+
+.jd-bookshelf .jd-folder-menu::-webkit-scrollbar-thumb,
+.jd-bookshelf .jd-sort-menu::-webkit-scrollbar-thumb{
+  background:rgba(225,197,175,.16)!important;
+}
+
+@media(max-width:650px){
+  .jd-bookshelf .jd-folder-menu{
+    width:min(230px,calc(100vw - 42px))!important;
+  }
+
+  .jd-bookshelf .jd-sort-menu{
+    width:170px!important;
+  }
+
+  .jd-bookshelf .jd-folder-menu,
+  .jd-bookshelf .jd-sort-menu{
+    padding:7px!important;
+    border-radius:13px!important;
+  }
+
+  .jd-bookshelf .jd-folder-menu .jd-folder-option,
+  .jd-bookshelf .jd-sort-menu .jd-sort-option{
+    min-height:37px!important;
+    font-size:12px!important;
+  }
+}
+/* ===== /DW2 editorial dropdowns · v1.6.0 ===== */
