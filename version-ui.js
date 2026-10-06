@@ -44,7 +44,6 @@ export function openVersionDialog({ manager, element, button, dialog, currentVer
         rollback.disabled = manager.busy || manager.reloadNeeded || !checked?.previous;
         update.textContent = checked?.latest ? `更新到 V${checked.latest.version}` : '更新到最新版';
         rollback.textContent = checked?.previous ? `退回 V${checked.previous.version}` : '退回上一版本';
-        reload.hidden = !manager.reloadNeeded;
     }
     async function run(action) {
         notice.textContent = '正在处理，请稍候…';
