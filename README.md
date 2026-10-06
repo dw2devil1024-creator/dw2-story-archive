@@ -5,6 +5,10 @@ A customized SillyTavern / TauriTavern character shelf and story archive.
 > Based on **砚台 · 角色书架** by 阿砚 · Codex.  
 > This repository keeps the original internal storage namespace for compatibility while maintaining the customized interface as **DW2 · Story Archive**.
 
+## 当前版本
+
+**v1.5.0**
+
 ## 安装
 
 在 SillyTavern / TauriTavern 的“安装扩展”中使用：
