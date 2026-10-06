@@ -1701,3 +1701,105 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   background:rgba(126,76,62,.12)!important;
 }
 /* ===== /DW2 folder management polish · v1.5.8 ===== */
+
+/* ===== DW2 fixed dropdown glass · v1.5.9 ===== */
+/* Folder and sort popovers intentionally do not inherit the active Tavern theme. */
+.jd-bookshelf .jd-folder-menu,
+.jd-bookshelf .jd-sort-menu{
+  border:1px solid rgba(232,220,208,.15)!important;
+  border-top-color:rgba(255,244,233,.24)!important;
+  border-radius:11px!important;
+  background:
+    linear-gradient(145deg,rgba(48,42,38,.92),rgba(27,23,21,.94))!important;
+  box-shadow:
+    0 18px 46px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.018)!important;
+  backdrop-filter:blur(20px) saturate(108%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(108%)!important;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(224,200,181,.22) transparent;
+}
+
+.jd-bookshelf .jd-folder-menu::-webkit-scrollbar,
+.jd-bookshelf .jd-sort-menu::-webkit-scrollbar{
+  width:4px;
+}
+
+.jd-bookshelf .jd-folder-menu::-webkit-scrollbar-thumb,
+.jd-bookshelf .jd-sort-menu::-webkit-scrollbar-thumb{
+  border-radius:999px;
+  background:rgba(224,200,181,.22);
+}
+
+.jd-bookshelf .jd-folder-menu::-webkit-scrollbar-track,
+.jd-bookshelf .jd-sort-menu::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+/* Neutral warm text, independent of SmartTheme variables. */
+.jd-bookshelf .jd-folder-menu .jd-folder-option,
+.jd-bookshelf .jd-sort-menu .jd-sort-option{
+  color:rgba(247,239,232,.68)!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:7px!important;
+  font-family:var(--shelf-font)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-option:hover,
+.jd-bookshelf .jd-folder-menu .jd-folder-option:focus-visible,
+.jd-bookshelf .jd-sort-menu .jd-sort-option:hover,
+.jd-bookshelf .jd-sort-menu .jd-sort-option:focus-visible{
+  color:rgba(255,249,244,.94)!important;
+  background:rgba(255,255,255,.055)!important;
+  outline:0!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-option[aria-pressed=true],
+.jd-bookshelf .jd-sort-menu .jd-sort-option[aria-checked=true]{
+  color:rgba(255,249,244,.95)!important;
+  background:
+    linear-gradient(90deg,rgba(215,186,164,.11),rgba(255,255,255,.025))!important;
+  font-weight:500!important;
+}
+
+.jd-bookshelf .jd-sort-menu .jd-sort-mark{
+  color:rgba(226,197,174,.72)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-section-label,
+.jd-bookshelf .jd-folder-menu .jd-current-folder-label{
+  border-top-color:rgba(232,220,208,.10)!important;
+  color:rgba(244,236,229,.40)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-actions{
+  border-top-color:rgba(232,220,208,.11)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-option.jd-drop-target{
+  color:rgba(255,249,244,.96)!important;
+  background:rgba(215,186,164,.11)!important;
+  outline:1px solid rgba(226,197,174,.35)!important;
+  outline-offset:-2px!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-delete{
+  color:rgba(235,205,195,.68)!important;
+}
+
+.jd-bookshelf .jd-folder-menu .jd-folder-delete:hover,
+.jd-bookshelf .jd-folder-menu .jd-folder-delete:focus-visible{
+  color:rgba(255,226,216,.94)!important;
+  background:rgba(126,76,62,.13)!important;
+}
+
+@media(max-width:650px){
+  .jd-bookshelf .jd-folder-menu,
+  .jd-bookshelf .jd-sort-menu{
+    border-radius:10px!important;
+    backdrop-filter:blur(18px) saturate(106%)!important;
+    -webkit-backdrop-filter:blur(18px) saturate(106%)!important;
+  }
+}
+/* ===== /DW2 fixed dropdown glass · v1.5.9 ===== */
