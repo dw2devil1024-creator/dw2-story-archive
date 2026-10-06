@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.5.5",
+  "latest": "1.5.6",
   "releases": [
+    {
+      "version": "1.5.6",
+      "branch": "v1.5.6",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.5.6-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "重做版本更新确认弹窗按钮：取消旧版双层边框，统一为 DW2 暖色玻璃样式，并优化确认更新/切换文案。"
+    },
     {
       "version": "1.5.5",
       "branch": "v1.5.5",
