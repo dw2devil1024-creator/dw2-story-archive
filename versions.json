@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.5.0",
+  "latest": "1.5.1",
   "releases": [
+    {
+      "version": "1.5.1",
+      "branch": "v1.5.1",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.5.1-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "修复部分设备上同一行角色卡高度不一致的问题；保持 3:4 封面、裁切与三列布局不变。"
+    },
     {
       "version": "1.5.0",
       "branch": "v1.5.0",
