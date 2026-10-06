@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.5.8",
+  "latest": "1.5.9",
   "releases": [
+    {
+      "version": "1.5.9",
+      "branch": "v1.5.9",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.5.9-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "固定“全部/文件夹”和“排序”下拉面板为 DW2 暖色烟熏玻璃，不再跟随酒馆主题变量；功能与滚动逻辑保持不变。"
+    },
     {
       "version": "1.5.8",
       "branch": "v1.5.8",
