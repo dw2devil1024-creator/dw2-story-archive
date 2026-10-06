@@ -1,7 +1,12 @@
 /* Keep release controls in the extension settings, away from the bookshelf toolbar. */
 export function openVersionDialog({ manager, element, button, dialog, currentVersion, notify, refresh }) {
-    const { modal, body, notice } = dialog('书架版本');
-    body.append(element('p', 'jd-dialog-intro', `当前版本 V${currentVersion}`));
+    const { modal, body, notice } = dialog('版本管理');
+    modal.classList.add('jd-version-dialog');
+    const hero = element('section', 'jd-version-hero');
+    const heroCopy = element('div', 'jd-version-hero-copy');
+    heroCopy.append(element('span', 'jd-version-kicker', 'DW2 · STORY ARCHIVE'), element('span', 'jd-version-caption', 'CURRENT BUILD'));
+    hero.append(heroCopy, element('strong', 'jd-version-number', `V${currentVersion}`));
+    body.append(hero);
     let checked = null;
     const actions = element('div', 'jd-version-actions');
     const details = element('p', 'jd-version-notes');
@@ -11,22 +16,22 @@ export function openVersionDialog({ manager, element, button, dialog, currentVer
         label.append(element('span', '', '发布仓库'));
         const input = element('input', 'jd-input'); input.type = 'url'; input.value = manager.repository;
         input.placeholder = 'https://github.com/作者/仓库名'; input.setAttribute('aria-label', '书架发布仓库');
-        const store = button('保存网址', 'jd-secondary-button', () => {
+        const store = button('保存网址', 'jd-version-save', () => {
             try { input.value = manager.setRepository(input.value); checked = null; sync(); notice.textContent = '仓库网址已保存，可以检查版本。'; }
             catch (error) { notice.textContent = error.message; }
         });
         label.append(input, store); body.append(label); inputs.push(input, store);
     }
-    const check = button('检查更新', 'jd-secondary-button', async () => {
+    const check = button('检查更新', 'jd-version-action jd-version-check', async () => {
         await run(async () => {
             checked = await manager.check();
             details.textContent = checked.latest ? `V${checked.latest.version}\n${checked.latest.notes}` : checked.unavailableLatest ? '新版暂未完成发布或与当前酒馆不兼容。' : '当前没有可用的新版本。';
             notice.textContent = checked.previous ? `可退回 V${checked.previous.version}。切换前会保存书架设置备份。` : '暂无更早的兼容版本可回退。';
         });
     });
-    const update = button('更新到最新版', 'jd-primary-button', () => confirm(checked?.latest));
-    const rollback = button('退回上一版本', 'jd-secondary-button', () => confirm(checked?.previous));
-    const reload = button('刷新酒馆', 'jd-primary-button', async () => {
+    const update = button('更新到最新版', 'jd-version-action jd-version-update', () => confirm(checked?.latest));
+    const rollback = button('退回上一版本', 'jd-version-action jd-version-rollback', () => confirm(checked?.previous));
+    const reload = button('刷新酒馆', 'jd-version-action jd-version-reload', async () => {
         try { await refresh(); } catch (error) { notice.textContent = error.message; }
     });
     actions.append(check, update, rollback, reload); body.append(actions, details);
