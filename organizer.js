@@ -128,13 +128,21 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
     });
     toggle.addEventListener('dragenter', () => { if (dragKeys.length && menu.hidden) open(false); });
     toggle.addEventListener('dragover', event => { if (dragKeys.length) event.preventDefault(); });
+    function flashNotice(message, delay = 2200) {
+        clearTimeout(shell.noticeTimer);
+        shell.notice.textContent = message;
+        shell.noticeTimer = setTimeout(() => {
+            if (shell.notice.textContent === message) shell.notice.textContent = '';
+            shell.noticeTimer = null;
+        }, delay);
+    }
     function commitMove(keys, target) {
         try {
             const count = moveCards(settings(), keys, target, shell.entities);
             const name = foldersFor(settings()).find(f => f.id === target)?.name || '未分类';
             save(); shell.selected.clear(); redraw();
-            shell.notice.textContent = `已将 ${count} 张卡移至「${name}」。`;
-        } catch (error) { shell.notice.textContent = error.message; }
+            flashNotice(`已将 ${count} 张卡移至「${name}」。`);
+        } catch (error) { flashNotice(error.message, 3600); }
     }
     function addDrop(target, folderId) {
         target.addEventListener('dragover', event => {
@@ -175,7 +183,8 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
     }
     function renderMenu() {
         menu.replaceChildren();
-        for (const folder of [{ id: 'all', name: '全部' }, { id: 'unfiled', name: '未分类' }, ...foldersFor(settings())]) {
+        const folders = foldersFor(settings());
+        for (const folder of [{ id: 'all', name: '全部' }, { id: 'unfiled', name: '未分类' }, ...folders]) {
             const option = button(folder.name, 'jd-folder-option', () => {
                 shell.scope = folder.id; shell.page = 0; close(true); shell.draw(); shell.remember();
             });
@@ -183,6 +192,22 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
             if (folder.id !== 'all') addDrop(option, folder.id === 'unfiled' ? '' : folder.id);
             menu.append(option);
         }
+
+        // Keep folder management near the folder list instead of burying it
+        // below potentially dozens of tag filters.
+        const actions = element('div', 'jd-folder-actions');
+        actions.append(button('＋ 新建文件夹', 'jd-folder-option', () => editFolder()));
+        const current = folders.find(f => f.id === shell.scope);
+        if (current) {
+            const label = element('div', 'jd-folder-section-label jd-current-folder-label', `管理「${current.name}」`);
+            actions.append(
+                label,
+                button('重命名文件夹', 'jd-folder-option jd-folder-rename', () => editFolder(current)),
+                button('删除文件夹', 'jd-folder-option jd-folder-delete', () => deleteFolder(current)),
+            );
+        }
+        menu.append(actions);
+
         const tagged = new Set(); let hasNoTags = false;
         for (const entity of shell.entities.values()) {
             if (entity.assistant) continue;
@@ -212,11 +237,6 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
                 menu.append(option);
             }
         }
-        const actions = element('div', 'jd-folder-actions');
-        actions.append(button('＋ 新建文件夹', 'jd-folder-option', () => editFolder()));
-        const current = foldersFor(settings()).find(f => f.id === shell.scope);
-        if (current) actions.append(button('重命名文件夹', 'jd-folder-option', () => editFolder(current)), button('删除文件夹', 'jd-folder-option', () => deleteFolder(current)));
-        menu.append(actions);
         // Match the sort menu's explicit focusability, including action buttons.
         for (const option of menu.querySelectorAll('button')) option.tabIndex = -1;
     }
