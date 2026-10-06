@@ -1493,17 +1493,30 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 }
 
 .jd-story-card .jd-card-bottom{
+  display:flex!important;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:nowrap!important;
+  gap:6px;
   margin-top:auto;
   min-width:0;
   white-space:nowrap;
+  overflow:hidden;
 }
 
 .jd-story-card .jd-last-played{
+  flex:1 1 auto;
   min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 .jd-story-card .jd-card-action{
   flex:0 0 auto;
+  min-width:max-content;
+  margin-left:auto;
   white-space:nowrap;
 }
 /* ===== /DW2 cross-device equal-height cards · v1.5.1 ===== */
