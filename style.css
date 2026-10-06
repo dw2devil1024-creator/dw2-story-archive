@@ -2187,9 +2187,9 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-bookshelf,
 .jd-shelf-dialog,
 #jd-bookshelf-settings,
-.jd-bookshelf *:not(i),
-.jd-shelf-dialog *:not(i),
-#jd-bookshelf-settings *:not(i){
+.jd-bookshelf *:not(i):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands),
+.jd-shelf-dialog *:not(i):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands),
+#jd-bookshelf-settings *:not(i):not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands){
   font-family:'Noto Serif SC','Songti SC','STSong','Source Han Serif SC','Noto Serif CJK SC',serif!important;
 }
 
@@ -2288,3 +2288,40 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   border-top-color:rgba(205,229,239,.10)!important;
 }
 /* ===== /DW2 full theme independence · v1.6.2 ===== */
+
+/* ===== DW2 native icon passthrough · v1.6.3 ===== */
+/* Native Tavern drawer / Font Awesome icons must keep the host icon font.
+   Only DW2 text is typography-locked. */
+#jd-bookshelf-settings .inline-drawer-icon,
+#jd-bookshelf-settings .fa,
+#jd-bookshelf-settings .fas,
+#jd-bookshelf-settings .far,
+#jd-bookshelf-settings .fab,
+#jd-bookshelf-settings .fa-solid,
+#jd-bookshelf-settings .fa-regular,
+#jd-bookshelf-settings .fa-brands,
+.jd-bookshelf .fa,
+.jd-bookshelf .fas,
+.jd-bookshelf .far,
+.jd-bookshelf .fab,
+.jd-bookshelf .fa-solid,
+.jd-bookshelf .fa-regular,
+.jd-bookshelf .fa-brands,
+.jd-shelf-dialog .fa,
+.jd-shelf-dialog .fas,
+.jd-shelf-dialog .far,
+.jd-shelf-dialog .fab,
+.jd-shelf-dialog .fa-solid,
+.jd-shelf-dialog .fa-regular,
+.jd-shelf-dialog .fa-brands{
+  font-family:inherit;
+}
+
+/* Let the native extension-drawer chevron keep Tavern's own icon styling. */
+#jd-bookshelf-settings .inline-drawer-icon{
+  color:inherit;
+  background:unset;
+  border:unset;
+  box-shadow:unset;
+}
+/* ===== /DW2 native icon passthrough · v1.6.3 ===== */
