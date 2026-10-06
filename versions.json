@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.5.4",
+  "latest": "1.5.5",
   "releases": [
+    {
+      "version": "1.5.5",
+      "branch": "v1.5.5",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.5.5-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "修复部分窄屏设备上卡片底部“时间 / 查看存档”换行的问题：底部始终保持单行，自适应压缩时间文本并保留完整操作入口。"
+    },
     {
       "version": "1.5.4",
       "branch": "v1.5.4",
