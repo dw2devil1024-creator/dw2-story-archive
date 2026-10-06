@@ -1667,3 +1667,37 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   }
 }
 /* ===== /DW2 version confirmation polish · v1.5.6 ===== */
+
+/* ===== DW2 folder management polish · v1.5.8 ===== */
+.jd-folder-actions{
+  border-top:1px solid rgba(232,220,208,.12)!important;
+  margin-top:5px!important;
+  padding-top:5px!important;
+}
+
+.jd-folder-actions .jd-current-folder-label{
+  margin:5px 5px 3px;
+  padding:8px 5px 3px;
+  border-top:1px solid rgba(232,220,208,.09);
+  color:rgba(244,236,229,.45);
+  font-size:10.5px;
+  letter-spacing:.035em;
+}
+
+.jd-folder-actions .jd-folder-rename,
+.jd-folder-actions .jd-folder-delete{
+  min-height:38px!important;
+  padding:7px 10px!important;
+  font-size:12.5px!important;
+}
+
+.jd-folder-actions .jd-folder-delete{
+  color:rgba(235,205,195,.72)!important;
+}
+
+.jd-folder-actions .jd-folder-delete:hover,
+.jd-folder-actions .jd-folder-delete:focus-visible{
+  color:rgba(255,225,214,.92)!important;
+  background:rgba(126,76,62,.12)!important;
+}
+/* ===== /DW2 folder management polish · v1.5.8 ===== */
