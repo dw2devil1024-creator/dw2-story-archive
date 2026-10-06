@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.6.2",
+  "latest": "1.6.3",
   "releases": [
+    {
+      "version": "1.6.3",
+      "branch": "v1.6.3",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.6.3-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "修复扩展设置页右侧原生展开/收起箭头被 Noto Serif SC 覆盖成方框的问题；Font Awesome 与酒馆原生抽屉图标恢复使用宿主图标字体，DW2 文字仍保持独立字体与配色。"
+    },
     {
       "version": "1.6.2",
       "branch": "v1.6.2",
