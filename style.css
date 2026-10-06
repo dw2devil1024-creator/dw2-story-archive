@@ -1263,10 +1263,10 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-version-number{
   flex:0 0 auto;
   margin:0;
-  font-size:27px;
+  font-size:22px;
   line-height:1;
   font-weight:500;
-  letter-spacing:.045em;
+  letter-spacing:.05em;
   background:linear-gradient(180deg,#fffaf6 8%,#d7baa4 100%);
   -webkit-background-clip:text;
   background-clip:text;
@@ -1438,7 +1438,7 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   }
 
   .jd-version-number{
-    font-size:24px;
+    font-size:20px;
   }
 
   .jd-version-dialog .jd-version-actions{
