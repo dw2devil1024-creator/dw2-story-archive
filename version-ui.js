@@ -78,12 +78,14 @@ export function openVersionDialog({ manager, element, button, dialog, currentVer
     function confirm(target) {
         if (!target || manager.busy || manager.reloadNeeded) return;
         const prompt = dialog(target.kind === 'latest' ? '更新到最新版？' : `切换到 V${target.version}？`);
+        prompt.modal.classList.add('jd-version-confirm');
         prompt.body.append(element('p', 'jd-dialog-intro', target.notes || '将切换书架程序版本，保留当前书架设置。'));
         prompt.body.append(element('p', 'jd-dialog-intro', '会先保存设置备份。兼容的分类、收藏、置顶与封面位置继续保留；旧版本可能不显示新增功能。'));
         if (target.version === '1.4.0') prompt.body.append(element('p', 'jd-dialog-intro', 'V1.4.0 尚无位置记忆和版本按钮。回退后，如需再升级，助手版需重新导入新版 JSON；独立扩展可从酒馆扩展管理切回 main。'));
-        const row = element('div', 'jd-version-actions');
-        const cancel = button('取消', 'jd-secondary-button', () => prompt.modal.close());
-        row.append(cancel, button('确认切换', 'jd-primary-button', () => {
+        const row = element('div', 'jd-version-confirm-actions');
+        const cancel = button('取消', 'jd-version-confirm-button jd-version-confirm-cancel', () => prompt.modal.close());
+        const confirmText = target.kind === 'latest' ? '确认更新' : '确认切换';
+        row.append(cancel, button(confirmText, 'jd-version-confirm-button jd-version-confirm-apply', () => {
             prompt.modal.close();
             void run(async () => {
                 const version = await manager.apply(checked, target);
