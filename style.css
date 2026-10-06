@@ -1159,3 +1159,298 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   }
 }
 
+/* ===== DW2 version manager · v1.5 ===== */
+.jd-shelf-dialog.jd-version-dialog{
+  width:min(540px,calc(100vw - 24px))!important;
+  max-width:min(540px,calc(100vw - 24px))!important;
+  overflow:hidden;
+  border:1px solid rgba(232,220,208,.17)!important;
+  border-top:1px solid rgba(255,244,233,.30)!important;
+  border-radius:16px!important;
+  background:
+    linear-gradient(145deg,rgba(43,37,33,.82),rgba(22,19,17,.88))!important;
+  box-shadow:0 28px 80px rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(22px) saturate(112%);
+  -webkit-backdrop-filter:blur(22px) saturate(112%);
+}
+
+.jd-version-dialog .jd-dialog-head{
+  position:relative;
+  padding:18px 20px 14px;
+  border-bottom:0!important;
+  background:transparent!important;
+}
+
+.jd-version-dialog .jd-dialog-head::after{
+  content:"";
+  position:absolute;
+  left:20px;
+  right:20px;
+  bottom:0;
+  height:1px;
+  background:linear-gradient(90deg,rgba(255,244,233,.28),rgba(201,171,148,.14),transparent);
+}
+
+.jd-version-dialog .jd-dialog-head h2{
+  font-size:19px!important;
+  font-weight:500!important;
+  letter-spacing:.08em;
+  color:rgba(255,248,242,.94)!important;
+}
+
+.jd-version-dialog .jd-dialog-head .jd-icon-button{
+  width:32px;
+  min-width:32px;
+  height:32px;
+  min-height:32px;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  color:rgba(255,248,242,.58)!important;
+  font-size:23px!important;
+  font-weight:300;
+  opacity:1;
+}
+
+.jd-version-dialog .jd-dialog-head .jd-icon-button:hover{
+  border:0!important;
+  background:rgba(255,255,255,.055)!important;
+  color:rgba(255,248,242,.95)!important;
+}
+
+.jd-version-dialog .jd-dialog-body{
+  padding:18px 20px 20px;
+}
+
+.jd-version-hero{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  margin:0 0 16px;
+  padding:17px 18px 16px;
+  border:1px solid rgba(232,220,208,.13);
+  border-radius:13px;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.055),rgba(201,171,148,.022));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.jd-version-hero-copy{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  min-width:0;
+}
+
+.jd-version-kicker{
+  color:rgba(255,248,242,.92);
+  font-size:10px;
+  line-height:1.4;
+  font-weight:600;
+  letter-spacing:.20em;
+  white-space:nowrap;
+}
+
+.jd-version-caption{
+  color:rgba(255,248,242,.42);
+  font-size:10px;
+  line-height:1.4;
+  letter-spacing:.13em;
+}
+
+.jd-version-number{
+  flex:0 0 auto;
+  margin:0;
+  font-size:27px;
+  line-height:1;
+  font-weight:500;
+  letter-spacing:.045em;
+  background:linear-gradient(180deg,#fffaf6 8%,#d7baa4 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+}
+
+.jd-version-dialog .jd-version-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:0 0 14px;
+}
+
+.jd-version-dialog .jd-version-action{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  width:100%;
+  min-width:0;
+  min-height:48px;
+  margin:0;
+  padding:10px 13px;
+  border:1px solid rgba(232,220,208,.13)!important;
+  border-radius:11px!important;
+  background:rgba(255,255,255,.035)!important;
+  color:rgba(255,248,242,.76)!important;
+  font-size:13px;
+  font-weight:500;
+  line-height:1.35;
+  letter-spacing:.025em;
+  text-align:left;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease,opacity .16s ease!important;
+}
+
+.jd-version-dialog .jd-version-action::before{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 25px;
+  width:25px;
+  height:25px;
+  border:1px solid rgba(232,220,208,.12);
+  border-radius:50%;
+  color:rgba(255,248,242,.62);
+  font:400 14px/1 system-ui,sans-serif;
+}
+
+.jd-version-dialog .jd-version-check::before{content:"↻";}
+.jd-version-dialog .jd-version-update::before{content:"↑";}
+.jd-version-dialog .jd-version-rollback::before{content:"↶";}
+.jd-version-dialog .jd-version-reload::before{content:"⟳";}
+
+.jd-version-dialog .jd-version-action:not(:disabled):hover{
+  transform:translateY(-1px);
+  border-color:rgba(239,222,207,.25)!important;
+  background:rgba(255,255,255,.065)!important;
+  color:rgba(255,250,246,.96)!important;
+}
+
+.jd-version-dialog .jd-version-update:not(:disabled){
+  border-color:rgba(215,186,164,.22)!important;
+  background:linear-gradient(135deg,rgba(215,186,164,.11),rgba(255,255,255,.035))!important;
+}
+
+.jd-version-dialog .jd-version-action:disabled{
+  opacity:.32!important;
+  cursor:not-allowed!important;
+}
+
+.jd-version-dialog .jd-version-actions[aria-busy=true] .jd-version-action:disabled{
+  cursor:wait!important;
+}
+
+.jd-version-dialog .jd-version-action[hidden],
+.jd-version-dialog [hidden]{
+  display:none!important;
+}
+
+.jd-version-dialog .jd-version-notes{
+  margin:0 0 13px;
+  padding:12px 14px;
+  border-left:1px solid rgba(215,186,164,.30);
+  background:linear-gradient(90deg,rgba(215,186,164,.055),transparent);
+  color:rgba(255,248,242,.64);
+  font-size:12px;
+  line-height:1.75;
+}
+
+.jd-version-dialog .jd-version-notes:empty{
+  display:none;
+}
+
+.jd-version-dialog .jd-version-help{
+  position:relative;
+  display:block;
+  margin-top:13px;
+  padding-top:13px;
+  color:rgba(255,248,242,.42);
+  font-size:11px;
+  line-height:1.75;
+}
+
+.jd-version-dialog .jd-version-help::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:1px;
+  background:linear-gradient(90deg,rgba(232,220,208,.14),transparent);
+}
+
+.jd-version-dialog .jd-shelf-notice:not(:empty){
+  margin:0!important;
+  padding:0 20px 17px!important;
+  color:rgba(255,248,242,.66);
+  font-size:12px;
+}
+
+.jd-version-dialog .jd-version-source{
+  gap:7px;
+  margin:0 0 14px;
+  color:rgba(255,248,242,.56);
+  font-size:11px;
+}
+
+.jd-version-dialog .jd-version-source .jd-input{
+  min-height:42px;
+  border:1px solid rgba(232,220,208,.13)!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.035)!important;
+}
+
+.jd-version-dialog .jd-version-save{
+  min-height:40px;
+  padding:8px 12px;
+  border:1px solid rgba(232,220,208,.13)!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.04)!important;
+  color:rgba(255,248,242,.72)!important;
+  font-size:12px;
+}
+
+@media(max-width:520px){
+  .jd-shelf-dialog.jd-version-dialog{
+    width:min(94vw,540px)!important;
+    max-width:94vw!important;
+    border-radius:14px!important;
+  }
+
+  .jd-version-dialog .jd-dialog-head{
+    padding:15px 15px 12px;
+  }
+
+  .jd-version-dialog .jd-dialog-head::after{
+    left:15px;
+    right:15px;
+  }
+
+  .jd-version-dialog .jd-dialog-body{
+    padding:15px 15px 17px;
+  }
+
+  .jd-version-hero{
+    padding:15px;
+  }
+
+  .jd-version-number{
+    font-size:24px;
+  }
+
+  .jd-version-dialog .jd-version-actions{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .jd-version-dialog .jd-version-action{
+    min-height:46px;
+  }
+
+  .jd-version-dialog .jd-shelf-notice:not(:empty){
+    padding:0 15px 15px!important;
+  }
+}
