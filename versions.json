@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.6.3",
+  "latest": "1.6.4",
   "releases": [
+    {
+      "version": "1.6.4",
+      "branch": "v1.6.4",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.6.4-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "新增 DW2 独立书架封面：封面保存到 user/images/DW2-Story-Archive，不再修改酒馆角色卡原图；支持设置书架封面、恢复角色原图与独立裁切。"
+    },
     {
       "version": "1.6.3",
       "branch": "v1.6.3",
