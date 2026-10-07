@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.6.4",
+  "latest": "1.7.0",
   "releases": [
+    {
+      "version": "1.7.0",
+      "branch": "v1.7.0",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.7.0-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "新增自定义排序：切换到「自定义排序」后，可长按拖动角色卡自由调整顺序；顺序会持久保存，切换其他排序后再回来仍会保留。置顶卡继续固定在置顶区域，并可在置顶区域内手动排序。"
+    },
     {
       "version": "1.6.4",
       "branch": "v1.6.4",
