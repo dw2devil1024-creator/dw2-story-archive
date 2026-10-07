@@ -97,7 +97,7 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
     toggle.setAttribute('aria-expanded', 'false');
     control.append(toggle, menu);
     shell.scope ??= 'all'; shell.selected = new Set(); shell.organizing = false;
-    let dragKeys = [], disposed = false;
+    let dragKeys = [], reorderKey = '', disposed = false;
     const holds = new Set();
     const outside = event => { if (!control.contains(event.target)) close(); };
     function close(focus = false) {
@@ -124,7 +124,7 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
     // That is not evidence of leaving the menu: let the ensuing click complete.
     // Outside pointerdown and keyboard Tab/Escape still dismiss it explicitly.
     control.addEventListener('focusout', event => {
-        if (event.relatedTarget && !control.contains(event.relatedTarget) && !dragKeys.length) close();
+        if (event.relatedTarget && !control.contains(event.relatedTarget) && !dragKeys.length && !reorderKey) close();
     });
     toggle.addEventListener('dragenter', () => { if (dragKeys.length && menu.hidden) open(false); });
     toggle.addEventListener('dragover', event => { if (dragKeys.length) event.preventDefault(); });
@@ -135,6 +135,42 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
             if (shell.notice.textContent === message) shell.notice.textContent = '';
             shell.noticeTimer = null;
         }, delay);
+    }
+    function clearReorderTargets() {
+        shell.root.querySelectorAll('.jd-reorder-before,.jd-reorder-after').forEach(item => {
+            item.classList.remove('jd-reorder-before', 'jd-reorder-after');
+        });
+    }
+    function normalizedCustomOrder() {
+        const s = settings();
+        const known = [...shell.entities.values()].filter(entity => !entity.assistant).map(entity => entity.key);
+        const allowed = new Set(known), seen = new Set(), order = [];
+        for (const key of Array.isArray(s.customOrder) ? s.customOrder : []) {
+            if (!allowed.has(key) || seen.has(key)) continue;
+            seen.add(key); order.push(key);
+        }
+        for (const key of known) if (!seen.has(key)) order.push(key);
+        return order;
+    }
+    function commitReorder(sourceKey, targetKey, before) {
+        if (!sourceKey || !targetKey || sourceKey === targetKey) return;
+        const source = shell.entities.get(sourceKey), target = shell.entities.get(targetKey);
+        if (!source || !target || source.assistant || target.assistant) return;
+        const pinned = new Set(Array.isArray(settings().pinned) ? settings().pinned : []);
+        if (pinned.has(sourceKey) !== pinned.has(targetKey)) {
+            flashNotice('置顶卡和普通卡分区排列，请在同一区域内拖动。', 3000);
+            return;
+        }
+        const order = normalizedCustomOrder();
+        const from = order.indexOf(sourceKey), targetIndex = order.indexOf(targetKey);
+        if (from < 0 || targetIndex < 0) return;
+        order.splice(from, 1);
+        const nextTarget = order.indexOf(targetKey);
+        order.splice(before ? nextTarget : nextTarget + 1, 0, sourceKey);
+        settings().customOrder = order;
+        save();
+        redraw();
+        flashNotice('自定义顺序已保存。', 1500);
     }
     function commitMove(keys, target) {
         try {
@@ -316,7 +352,7 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
             if (shell.organizing) { event.preventDefault(); event.stopImmediatePropagation(); select(entity); }
         }, true);
         main.addEventListener('pointerdown', event => {
-            if (event.pointerType !== 'touch' || !event.isPrimary) return;
+            if (event.pointerType !== 'touch' || !event.isPrimary || (shell.customSort && !shell.organizing)) return;
             cancelHold(); pointer = { x: event.clientX, y: event.clientY }; holds.add(cancelHold);
             timer = setTimeout(() => {
                 cancelHold(); if (disposed || !item.isConnected) return;
@@ -327,19 +363,51 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
         for (const type of ['pointerup', 'pointercancel', 'pointerleave']) main.addEventListener(type, () => {
             cancelHold(); pointer = null; if (suppressUntil === Infinity) suppressUntil = performance.now() + 700;
         });
-        main.addEventListener('contextmenu', event => { if (timer || shell.organizing) event.preventDefault(); });
+        main.addEventListener('contextmenu', event => { if (timer || shell.organizing || (shell.customSort && !shell.organizing)) event.preventDefault(); });
         main.draggable = true;
         main.querySelectorAll('img').forEach(img => { img.draggable = false; });
+        item.addEventListener('dragover', event => {
+            if (!shell.customSort || shell.organizing || !reorderKey || reorderKey === entity.key) return;
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+            const rect = item.getBoundingClientRect();
+            const before = event.clientY < rect.top + rect.height / 2;
+            clearReorderTargets();
+            item.classList.add(before ? 'jd-reorder-before' : 'jd-reorder-after');
+        });
+        item.addEventListener('dragleave', event => {
+            if (event.relatedTarget && item.contains(event.relatedTarget)) return;
+            item.classList.remove('jd-reorder-before', 'jd-reorder-after');
+        });
+        item.addEventListener('drop', event => {
+            if (!shell.customSort || shell.organizing || !reorderKey || reorderKey === entity.key) return;
+            event.preventDefault(); event.stopPropagation();
+            const before = item.classList.contains('jd-reorder-before');
+            const source = reorderKey;
+            reorderKey = '';
+            clearReorderTargets();
+            commitReorder(source, entity.key, before);
+        });
         main.addEventListener('dragstart', event => {
             cancelHold(); if (!event.dataTransfer) return;
-            dragKeys = shell.selected.has(entity.key) ? [...shell.selected] : [entity.key];
-            event.dataTransfer.setData('application/x-yantai-cards', 'internal'); event.dataTransfer.effectAllowed = 'move';
+            if (shell.customSort && !shell.organizing) {
+                dragKeys = []; reorderKey = entity.key;
+                event.dataTransfer.setData('application/x-dw2-order', entity.key);
+            } else {
+                reorderKey = '';
+                dragKeys = shell.selected.has(entity.key) ? [...shell.selected] : [entity.key];
+                event.dataTransfer.setData('application/x-yantai-cards', 'internal');
+            }
+            event.dataTransfer.effectAllowed = 'move';
             item.classList.add('jd-dragging');
         });
-        main.addEventListener('dragend', () => { dragKeys = []; item.classList.remove('jd-dragging'); close(); });
+        main.addEventListener('dragend', () => {
+            dragKeys = []; reorderKey = ''; suppressUntil = performance.now() + 500;
+            item.classList.remove('jd-dragging'); clearReorderTargets(); close();
+        });
     }
     return { control, organize, bar, sync, decorateCard,
-        beforeDraw() { for (const cancel of holds) cancel(); sync(); },
-        dispose() { disposed = true; close(); for (const cancel of holds) cancel(); shell.selected.clear(); dragKeys = []; },
+        beforeDraw() { for (const cancel of holds) cancel(); clearReorderTargets(); sync(); },
+        dispose() { disposed = true; close(); for (const cancel of holds) cancel(); clearReorderTargets(); shell.selected.clear(); dragKeys = []; reorderKey = ''; },
     };
 }
