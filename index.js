@@ -41,6 +41,8 @@ function settings() {
     if (typeof s.enabled !== 'boolean') s.enabled = true;
     for (const key of ['favorites', 'aliases', 'crops', 'covers']) if (!s[key] || typeof s[key] !== 'object' || Array.isArray(s[key])) s[key] = {};
     if (!Array.isArray(s.pinned)) s.pinned = [];
+    if (!Array.isArray(s.customOrder)) s.customOrder = [];
+    s.customOrder = [...new Set(s.customOrder.filter(key => typeof key === 'string' && key))];
     s.sort = normalizeSort(s.sort);
     s.pageSize = pageSize(s.pageSize);
     return s;
@@ -739,8 +741,14 @@ function createShelf(isHome = false) {
     for (const [value, label] of SORT_OPTIONS) {
         const option = button('', 'jd-sort-option', () => {
             closeSort(true);
-            if (normalizeSort(settings().sort) === value) return;
-            settings().sort = value; save();
+            const s = settings();
+            if (normalizeSort(s.sort) === value) return;
+            if (value === 'custom' && !s.customOrder.length) {
+                s.customOrder = filterEntities([...shell.entities.values()], '', 'all', s, counts)
+                    .filter(entity => !entity.assistant)
+                    .map(entity => entity.key);
+            }
+            s.sort = value; save();
             for (const view of shells) { view.page = 0; view.draw(); }
             shell.remember();
         });
@@ -822,6 +830,9 @@ function createShelf(isHome = false) {
     shell.draw = () => {
         const all = entitiesFromContext(ctx(), assistantAvatar());
         shell.entities = new Map(all.map(entity => [entity.key, entity]));
+        const activeSort = normalizeSort(settings().sort);
+        shell.customSort = activeSort === 'custom';
+        root.classList.toggle('jd-custom-sort', shell.customSort);
         shell.organizer.beforeDraw();
         const chosen = filterEntities(filterFolder(all, shell.scope, settings()), shell.query, shell.filter, settings(), counts);
         const renderPage = ordered => {
@@ -839,13 +850,12 @@ function createShelf(isHome = false) {
         const groupCount = chosen.filter(e => e.kind === 'group').length;
         tally.textContent = `${characterCount} 张角色卡${groupCount ? ` · ${groupCount} 个群聊` : ''}${shell.query ? ' · 搜索结果' : ''}`;
         favoriteTab.setAttribute('aria-pressed', String(shell.filter === 'favorites'));
-        const activeSort = normalizeSort(settings().sort);
         sort.title = `当前排序：${SORT_OPTIONS.find(([value]) => value === activeSort)[1]}`;
         for (const [value, option] of sortItems) option.setAttribute('aria-checked', String(value === activeSort));
         const run = ++shell.sortRun;
         shell.countTargets = new Set(activeSort === 'count' ? chosen.filter(e => !e.assistant).map(e => e.key) : []);
         renderPage(chosen);
-        sortStatus.textContent = '';
+        sortStatus.textContent = activeSort === 'custom' ? '长按拖动卡片调整顺序' : '';
         if (activeSort === 'count') {
             const targets = chosen.filter(entity => !entity.assistant);
             const missing = targets.filter(entity => !counts.has(entity.key));
