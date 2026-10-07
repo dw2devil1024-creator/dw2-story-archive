@@ -17,7 +17,7 @@ export const aliasKey = (key, name) => JSON.stringify([key, fileStem(name)]);
 export const bounded = (value, fallback = 50) => Number.isFinite(Number(value)) ? Math.max(0, Math.min(100, Number(value))) : fallback;
 export const SORT_OPTIONS = Object.freeze([
     ['recent', '最近游玩'], ['added', '最近添加'], ['addedOldest', '最早添加'],
-    ['count', '存档最多'], ['name', '名称排序'],
+    ['count', '存档最多'], ['name', '名称排序'], ['custom', '自定义排序'],
 ]);
 export const normalizeSort = value => SORT_OPTIONS.some(([id]) => id === value) ? value : 'recent';
 const nameOrder = new Intl.Collator('zh-CN', { numeric: true, sensitivity: 'base' });
@@ -166,7 +166,17 @@ export function isPinned(entity, settings) {
 export function filterEntities(entities, query, filter, settings, counts = new Map()) {
     const q = query.trim().toLocaleLowerCase();
     const pins = new Map((Array.isArray(settings.pinned) ? settings.pinned : []).map((key, i) => [key, i]));
+    const custom = new Map((Array.isArray(settings.customOrder) ? settings.customOrder : []).map((key, i) => [key, i]));
     const sort = normalizeSort(settings.sort);
+    const customCompare = (a, b) => {
+        const ai = custom.get(a.key), bi = custom.get(b.key);
+        const aKnown = Number.isSafeInteger(ai), bKnown = Number.isSafeInteger(bi);
+        if (aKnown !== bKnown) return aKnown ? -1 : 1;
+        if (aKnown && ai !== bi) return ai - bi;
+        const aAdded = a.added || 0, bAdded = b.added || 0;
+        if (aAdded !== bAdded) return aAdded - bAdded;
+        return nameOrder.compare(a.name, b.name) || a.key.localeCompare(b.key);
+    };
     return entities.filter(entity => {
         if (q && ![entity.name, ...entity.tags].join(' ').toLocaleLowerCase().includes(q)) return false;
         if (entity.assistant) return filter !== 'favorites' || isFavorite(entity, settings);
@@ -179,6 +189,7 @@ export function filterEntities(entities, query, filter, settings, counts = new M
         const aPinned = !a.assistant && pins.has(a.key);
         const bPinned = !b.assistant && pins.has(b.key);
         if (aPinned !== bPinned) return Number(bPinned) - Number(aPinned);
+        if (sort === 'custom') return customCompare(a, b);
         if (aPinned && bPinned) return pins.get(a.key) - pins.get(b.key);
         if (sort === 'name') return nameOrder.compare(a.name, b.name) || a.key.localeCompare(b.key);
         if (sort === 'added' || sort === 'addedOldest') {
