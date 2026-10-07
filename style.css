@@ -2306,3 +2306,42 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   color:rgba(191,217,229,.60);
 }
 /* ===== /DW2 independent shelf cover · v1.6.4 ===== */
+
+/* ===== DW2 custom drag sorting · v1.7.0 ===== */
+.jd-custom-sort:not(.jd-organizing) .jd-open-card{
+  cursor:grab;
+}
+.jd-custom-sort:not(.jd-organizing) .jd-open-card:active{
+  cursor:grabbing;
+}
+.jd-custom-sort .jd-dragging{
+  opacity:.48!important;
+  transform:scale(.985)!important;
+}
+.jd-custom-sort .jd-reorder-before{
+  box-shadow:
+    inset 0 3px 0 var(--shelf-accent),
+    0 7px 20px rgba(0,0,0,.075)!important;
+}
+.jd-custom-sort .jd-reorder-after{
+  box-shadow:
+    inset 0 -3px 0 var(--shelf-accent),
+    0 7px 20px rgba(0,0,0,.075)!important;
+}
+.jd-custom-sort .jd-reorder-before,
+.jd-custom-sort .jd-reorder-after{
+  border-color:var(--shelf-accent)!important;
+}
+@media(max-width:650px){
+  .jd-custom-sort .jd-reorder-before{
+    box-shadow:
+      inset 0 2px 0 var(--shelf-accent),
+      0 5px 14px rgba(0,0,0,.065)!important;
+  }
+  .jd-custom-sort .jd-reorder-after{
+    box-shadow:
+      inset 0 -2px 0 var(--shelf-accent),
+      0 5px 14px rgba(0,0,0,.065)!important;
+  }
+}
+/* ===== /DW2 custom drag sorting · v1.7.0 ===== */
