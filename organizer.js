@@ -393,6 +393,7 @@ export function attachOrganizer({ shell, settings, save, redraw, element, button
             if (shell.customSort && !shell.organizing) {
                 dragKeys = []; reorderKey = entity.key;
                 event.dataTransfer.setData('application/x-dw2-order', entity.key);
+                event.dataTransfer.setData('text/plain', entity.key);
             } else {
                 reorderKey = '';
                 dragKeys = shell.selected.has(entity.key) ? [...shell.selected] : [entity.key];
