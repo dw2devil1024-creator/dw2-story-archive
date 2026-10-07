@@ -39,7 +39,7 @@ function settings() {
     if (!store[MODULE] || typeof store[MODULE] !== 'object') store[MODULE] = {};
     const s = store[MODULE];
     if (typeof s.enabled !== 'boolean') s.enabled = true;
-    for (const key of ['favorites', 'aliases', 'crops']) if (!s[key] || typeof s[key] !== 'object' || Array.isArray(s[key])) s[key] = {};
+    for (const key of ['favorites', 'aliases', 'crops', 'covers']) if (!s[key] || typeof s[key] !== 'object' || Array.isArray(s[key])) s[key] = {};
     if (!Array.isArray(s.pinned)) s.pinned = [];
     s.sort = normalizeSort(s.sort);
     s.pageSize = pageSize(s.pageSize);
@@ -228,12 +228,20 @@ function dateLabel(value, relative = true) {
     }
     return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', ...(relative ? {} : { hour: '2-digit', minute: '2-digit' }) }).format(date);
 }
-function imageSource(entity) {
+function nativeImageSource(entity) {
     if (entity.kind === 'char') return entity.id && entity.id !== 'none' ? url(`characters/${encodeURIComponent(entity.id)}`) : '';
     if (entity.kind === 'group' && typeof entity.avatar === 'string' && entity.avatar !== 'none') {
         try { const parsed = new URL(entity.avatar, appRoot); if (['http:', 'https:'].includes(parsed.protocol) || entity.avatar.startsWith('data:image/')) return parsed.href; } catch {}
     }
     return '';
+}
+function customCoverPath(entity) {
+    const path = settings().covers?.[entity.key];
+    return typeof path === 'string' && path.trim() ? path.trim() : '';
+}
+function imageSource(entity) {
+    const custom = customCoverPath(entity);
+    return custom ? url(custom) : nativeImageSource(entity);
 }
 function cropFor(entity) {
     const crop = settings().crops[entity.key] || DEFAULT_CROP;
@@ -243,15 +251,24 @@ function cover(entity, className = 'jd-cover') {
     const box = element('div', className);
     const fallback = element('span', 'jd-cover-letter', entity.assistant ? 'ST' : [...entity.name][0] || '书');
     fallback.setAttribute('aria-hidden', 'true'); box.append(fallback);
+    const custom = customCoverPath(entity);
     const src = imageSource(entity);
     if (src) {
         const img = element('img'); img.alt = '';
-        // Character images are served from the same filename after an avatar
-        // replacement. The revision query prevents the old bitmap lingering
-        // in the browser cache after a successful upload.
-        img.src = entity.kind === 'char' ? `${src}${src.includes('?') ? '&' : '?'}yantai=${cardsRevision}` : src;
+        img.src = custom ? src : (entity.kind === 'char' ? `${src}${src.includes('?') ? '&' : '?'}dw2=${cardsRevision}` : src);
         img.loading = 'lazy'; img.decoding = 'async'; img.style.objectPosition = cropFor(entity);
-        img.addEventListener('error', () => img.remove(), { once: true }); box.append(img);
+        img.addEventListener('error', () => {
+            if (custom) {
+                const fallback = nativeImageSource(entity);
+                if (fallback) {
+                    img.src = entity.kind === 'char' ? `${fallback}${fallback.includes('?') ? '&' : '?'}dw2=${cardsRevision}` : fallback;
+                    img.addEventListener('error', () => img.remove(), { once: true });
+                    return;
+                }
+            }
+            img.remove();
+        }, { once: true });
+        box.append(img);
     }
     return box;
 }
@@ -279,7 +296,7 @@ function dialog(title, wide = false) {
 
 function setBusy(value) {
     opening = value;
-    document.querySelectorAll('.jd-open-card,.jd-open-chat,.jd-open-native,.jd-new-chat,.jd-delete-chat,.jd-edit-alias,.jd-add-character,.jd-delete-character,.jd-replace-avatar,#jd-bookshelf-settings button').forEach(el => { el.disabled = value; });
+    document.querySelectorAll('.jd-open-card,.jd-open-chat,.jd-open-native,.jd-new-chat,.jd-delete-chat,.jd-edit-alias,.jd-add-character,.jd-delete-character,.jd-set-shelf-cover,.jd-reset-shelf-cover,#jd-bookshelf-settings button').forEach(el => { el.disabled = value; });
     document.getElementById('jd-bookshelf-open')?.setAttribute('aria-disabled', String(value));
 }
 async function safeAction(action) {
@@ -529,9 +546,9 @@ function editAlias(entity, row, refresh) {
 }
 
 function editCrop(entity) {
-    const { modal, body } = dialog('调整封面');
+    const { modal, body } = dialog('调整书架封面');
     const image = cover(entity, 'jd-cover jd-crop-preview');
-    body.append(image, element('p', 'jd-dialog-intro', '移动画面，让人物留在合适的位置。'));
+    body.append(image, element('p', 'jd-dialog-intro', '这里只调整 DW2 书架封面，不会修改酒馆角色卡原图。'));
     const current = settings().crops[entity.key] || DEFAULT_CROP;
     const values = { x: bounded(current.x, 50), y: bounded(current.y, 25) };
     for (const [key, title] of [['x', '左右位置'], ['y', '上下位置']]) {
@@ -540,33 +557,117 @@ function editCrop(entity) {
         range.addEventListener('input', () => { values[key] = Number(range.value); const img = image.querySelector('img'); if (img) img.style.objectPosition = `${values.x}% ${values.y}%`; });
         label.append(range); body.append(label);
     }
-    const replaceInput = element('input'); replaceInput.type = 'file'; replaceInput.accept = 'image/*'; replaceInput.hidden = true;
-    const replace = button('更换角色卡封面', 'jd-text-button jd-replace-avatar', () => replaceInput.click(), '替换酒馆原始角色卡图片，角色设定和存档会保留');
-    replaceInput.addEventListener('change', () => {
-        const file = replaceInput.files?.[0]; replaceInput.value = '';
-        if (!file) return;
-        safeAction(async () => {
-            await replaceCharacterAvatar(entity, file);
-            modal.close();
-            globalThis.toastr?.success('已更换角色卡封面。', 'DW2 · Story Archive');
+
+    const coverActions = element('div', 'jd-cover-actions');
+    if (entity.kind === 'char') {
+        const replaceInput = element('input'); replaceInput.type = 'file'; replaceInput.accept = 'image/*'; replaceInput.hidden = true;
+        const replace = button('设置书架封面', 'jd-text-button jd-set-shelf-cover', () => replaceInput.click(), '只替换 DW2 书架封面，不修改酒馆角色卡原图');
+        replaceInput.addEventListener('change', () => {
+            const file = replaceInput.files?.[0]; replaceInput.value = '';
+            if (!file) return;
+            safeAction(async () => {
+                await setShelfCover(entity, file);
+                modal.close();
+                globalThis.toastr?.success('已设置独立书架封面。', 'DW2 · Story Archive');
+            });
         });
-    });
-    const coverActions = element('div', 'jd-cover-actions'); coverActions.append(replace, replaceInput);
-    body.append(coverActions, button('保存封面位置', 'jd-primary-button', () => { settings().crops[entity.key] = values; save(); for (const shell of shells) shell.draw(); modal.close(); }));
+        coverActions.append(replace, replaceInput);
+        if (customCoverPath(entity)) {
+            coverActions.append(button('恢复角色原图', 'jd-text-button jd-reset-shelf-cover', () => {
+                safeAction(async () => {
+                    await resetShelfCover(entity);
+                    modal.close();
+                    globalThis.toastr?.success('书架已恢复角色原图。', 'DW2 · Story Archive');
+                });
+            }, '移除 DW2 独立封面，重新显示酒馆角色卡原图'));
+        }
+    }
+    if (coverActions.childElementCount) body.append(coverActions);
+    body.append(button('保存封面位置', 'jd-primary-button', () => { settings().crops[entity.key] = values; save(); for (const shell of shells) shell.draw(); modal.close(); }));
 }
 
-async function replaceCharacterAvatar(entity, file) {
-    if (entity.kind !== 'char') throw new Error('只有角色卡支持更换原始封面。');
-    if (entity.id === 'none') throw new Error('这张卡没有原始角色文件，请先在酒馆原生编辑页添加封面。');
-    if (!file.type?.startsWith('image/')) throw new Error('请选择图片文件。');
-    const api = await loadCore();
-    const form = new FormData(); form.append('avatar', file, file.name); form.append('avatar_url', entity.id);
-    const response = await fetch(url('api/characters/edit-avatar'), {
-        method: 'POST', headers: api.getRequestHeaders?.({ omitContentType: true }) || ctx().getRequestHeaders?.({ omitContentType: true }) || {}, body: form, cache: 'no-cache',
+function coverFileFormat(file) {
+    const mime = String(file.type || '').toLowerCase();
+    const byMime = {
+        'image/png': 'png',
+        'image/jpeg': 'jpg',
+        'image/jpg': 'jpg',
+        'image/webp': 'webp',
+        'image/gif': 'gif',
+        'image/bmp': 'bmp',
+    };
+    if (byMime[mime]) return byMime[mime];
+    const ext = String(file.name || '').split('.').pop()?.toLowerCase();
+    return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'jfif'].includes(ext) ? ext : '';
+}
+function coverFileBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('读取图片失败，请重新选择。'));
+        reader.onload = () => {
+            const result = String(reader.result || '');
+            const comma = result.indexOf(',');
+            if (comma < 0) return reject(new Error('图片格式无法读取。'));
+            resolve(result.slice(comma + 1));
+        };
+        reader.readAsDataURL(file);
     });
-    if (!response.ok) throw new Error('当前酒馆未提供换封面接口，请使用原生角色编辑页。');
-    invalidateArchiveData();
+}
+function coverKeyHash(value) {
+    let hash = 2166136261;
+    for (const char of String(value)) {
+        hash ^= char.codePointAt(0);
+        hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36);
+}
+function ownedShelfCover(path) {
+    return typeof path === 'string' && /(?:^|\/)user\/images\/DW2-Story-Archive\//.test(path);
+}
+async function deleteShelfCoverFile(path) {
+    if (!ownedShelfCover(path)) return;
+    const response = await fetch(url('api/images/delete'), {
+        method: 'POST',
+        headers: ctx().getRequestHeaders(),
+        body: JSON.stringify({ path }),
+        cache: 'no-store',
+    });
+    if (!response.ok && response.status !== 404) console.warn('[DW2 Story Archive] 未能清理旧书架封面', response.status);
+}
+async function setShelfCover(entity, file) {
+    if (entity.kind !== 'char') throw new Error('只有角色卡支持设置独立书架封面。');
+    if (!file.type?.startsWith('image/')) throw new Error('请选择图片文件。');
+    const format = coverFileFormat(file);
+    if (!format) throw new Error('暂不支持这张图片格式，请使用 PNG、JPG、WEBP、GIF 或 BMP。');
+    const image = await coverFileBase64(file);
+    const filename = `dw2-${coverKeyHash(entity.key)}-${Date.now()}.${format}`;
+    const response = await fetch(url('api/images/upload'), {
+        method: 'POST',
+        headers: ctx().getRequestHeaders(),
+        body: JSON.stringify({ image, format, filename, ch_name: 'DW2-Story-Archive' }),
+        cache: 'no-store',
+    });
+    if (!response.ok) throw new Error('酒馆未能保存书架封面，请稍后重试。');
+    const result = await response.json();
+    if (!result?.path) throw new Error('酒馆没有返回书架封面路径。');
+
+    const s = settings();
+    const previous = s.covers[entity.key];
+    s.covers[entity.key] = result.path;
+    save();
+    cardsRevision++;
     for (const shell of shells) shell.draw();
+    if (previous && previous !== result.path) await deleteShelfCoverFile(previous);
+}
+async function resetShelfCover(entity) {
+    const s = settings();
+    const previous = s.covers[entity.key];
+    if (!previous) return;
+    delete s.covers[entity.key];
+    save();
+    cardsRevision++;
+    for (const shell of shells) shell.draw();
+    await deleteShelfCoverFile(previous);
 }
 
 function card(entity, shell) {
