@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.7.1",
+  "latest": "1.7.2",
   "releases": [
+    {
+      "version": "1.7.2",
+      "branch": "v1.7.2",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.7.2-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "重做封面裁切渲染：改用 background-position 代替 object-position，修复 iPhone/WebKit 下横向或纵向裁切预览不响应的问题；滑杆同时监听 input/change。"
+    },
     {
       "version": "1.7.1",
       "branch": "v1.7.1",
