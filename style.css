@@ -2363,3 +2363,18 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   }
 }
 /* ===== /DW2 cover crop renderer · v1.7.2 ===== */
+
+/* ===== DW2 zoomable cover crop · v1.7.3 ===== */
+.jd-shelf-dialog .jd-crop-hint{
+  margin:2px 0 10px;
+  color:rgba(229,219,212,.52);
+  font-size:11px;
+  line-height:1.65;
+}
+.jd-shelf-dialog .jd-crop-label>span{
+  white-space:nowrap;
+}
+.jd-shelf-dialog .jd-crop-label input[type="range"]{
+  min-width:0;
+}
+/* ===== /DW2 zoomable cover crop · v1.7.3 ===== */
