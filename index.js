@@ -245,15 +245,56 @@ function imageSource(entity) {
     const custom = customCoverPath(entity);
     return custom ? url(custom) : nativeImageSource(entity);
 }
-function cropFor(entity) {
+const coverRatioCache = new Map();
+const coverRatioPending = new Map();
+function zoomValue(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? Math.max(100, Math.min(200, numeric)) : 100;
+}
+function cropValues(entity) {
     const crop = settings().crops[entity.key] || DEFAULT_CROP;
-    return `${bounded(crop.x, 50)}% ${bounded(crop.y, 25)}%`;
+    return { x: bounded(crop.x, 50), y: bounded(crop.y, 25), zoom: zoomValue(crop.zoom) };
+}
+function cropFor(entity) {
+    const crop = cropValues(entity);
+    return `${crop.x}% ${crop.y}%`;
 }
 function coverURL(entity, source, native = false) {
     if (!source) return '';
     return native && entity.kind === 'char'
         ? `${source}${source.includes('?') ? '&' : '?'}dw2=${cardsRevision}`
         : source;
+}
+function coverRatio(source) {
+    if (coverRatioCache.has(source)) return Promise.resolve(coverRatioCache.get(source));
+    if (coverRatioPending.has(source)) return coverRatioPending.get(source);
+    const pending = new Promise(resolve => {
+        const probe = new Image();
+        probe.onload = () => resolve(probe.naturalWidth && probe.naturalHeight ? probe.naturalWidth / probe.naturalHeight : 0.75);
+        probe.onerror = () => resolve(0.75);
+        probe.src = source;
+    }).then(ratio => {
+        coverRatioCache.set(source, ratio);
+        coverRatioPending.delete(source);
+        return ratio;
+    });
+    coverRatioPending.set(source, pending);
+    return pending;
+}
+function applyCoverFrame(art, source, values) {
+    const x = bounded(values?.x, 50), y = bounded(values?.y, 25), zoom = zoomValue(values?.zoom);
+    art.dataset.coverSource = source;
+    art.dataset.coverZoom = String(zoom);
+    art.style.setProperty('background-position', `${x}% ${y}%`, 'important');
+    art.style.setProperty('background-size', 'cover', 'important');
+    void coverRatio(source).then(ratio => {
+        if (!art.isConnected || art.dataset.coverSource !== source) return;
+        const liveZoom = zoomValue(art.dataset.coverZoom);
+        const box = art.parentElement;
+        const boxRatio = box?.clientWidth && box?.clientHeight ? box.clientWidth / box.clientHeight : 0.75;
+        const size = ratio >= boxRatio ? `auto ${liveZoom}%` : `${liveZoom}% auto`;
+        art.style.setProperty('background-size', size, 'important');
+    });
 }
 function cover(entity, className = 'jd-cover') {
     const box = element('div', className);
@@ -271,10 +312,9 @@ function cover(entity, className = 'jd-cover') {
             coverURL(entity, native, true),
         ].filter(Boolean);
         art.style.setProperty('background-image', layers.map(source => `url(${JSON.stringify(source)})`).join(', '), 'important');
-        art.style.setProperty('background-position', cropFor(entity), 'important');
-        art.style.setProperty('background-size', 'cover', 'important');
         art.style.setProperty('background-repeat', 'no-repeat', 'important');
         box.append(art);
+        applyCoverFrame(art, primary, cropValues(entity));
     }
     return box;
 }
@@ -555,20 +595,32 @@ function editCrop(entity) {
     const { modal, body } = dialog('调整书架封面');
     const image = cover(entity, 'jd-cover jd-crop-preview');
     body.append(image, element('p', 'jd-dialog-intro', '这里只调整 DW2 书架封面，不会修改酒馆角色卡原图。'));
-    const current = settings().crops[entity.key] || DEFAULT_CROP;
-    const values = { x: bounded(current.x, 50), y: bounded(current.y, 25) };
+    const values = cropValues(entity);
+    const source = imageSource(entity);
+    const refreshPreview = () => {
+        const art = image.querySelector('.jd-cover-art');
+        if (art && source) applyCoverFrame(art, source, values);
+    };
     for (const [key, title] of [['x', '左右位置'], ['y', '上下位置']]) {
         const label = element('label', 'jd-crop-label'); label.append(element('span', '', title));
         const range = element('input'); range.type = 'range'; range.min = '0'; range.max = '100'; range.value = String(values[key]);
-        const updatePreview = () => {
-            values[key] = Number(range.value);
-            const art = image.querySelector('.jd-cover-art');
-            if (art) art.style.setProperty('background-position', `${values.x}% ${values.y}%`, 'important');
-        };
+        const updatePreview = () => { values[key] = Number(range.value); refreshPreview(); };
         range.addEventListener('input', updatePreview);
         range.addEventListener('change', updatePreview);
         label.append(range); body.append(label);
     }
+    const zoomLabel = element('label', 'jd-crop-label');
+    const zoomTitle = element('span', '', `缩放 ${values.zoom}%`);
+    const zoom = element('input'); zoom.type = 'range'; zoom.min = '100'; zoom.max = '200'; zoom.step = '1'; zoom.value = String(values.zoom);
+    const updateZoom = () => {
+        values.zoom = zoomValue(zoom.value);
+        zoomTitle.textContent = `缩放 ${values.zoom}%`;
+        refreshPreview();
+    };
+    zoom.addEventListener('input', updateZoom);
+    zoom.addEventListener('change', updateZoom);
+    zoomLabel.append(zoomTitle, zoom); body.append(zoomLabel);
+    body.append(element('p', 'jd-crop-hint', '想同时左右、上下移动时，先稍微放大一点。'));
 
     const coverActions = element('div', 'jd-cover-actions');
     if (entity.kind === 'char') {
