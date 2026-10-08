@@ -70,6 +70,7 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-bookshelf .jd-open-card{display:block;width:100%;margin:0;padding:0;border:0;background:none;text-align:left;overflow:hidden;}
 .jd-cover{position:relative;display:block;width:100%;aspect-ratio:3/4;overflow:hidden;background:var(--shelf-inset);border-bottom:1px solid var(--shelf-soft-line,var(--shelf-line));}
 .jd-cover img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:50% 25%;border-radius:0;box-shadow:none;filter:none;}
+.jd-cover-art{position:absolute;inset:0;display:block;background-position:50% 25%;background-size:cover;background-repeat:no-repeat;border-radius:0;box-shadow:none;filter:none;}
 .jd-cover-letter{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:50px;font-weight:400;letter-spacing:.1em;color:var(--shelf-ink);}
 .jd-cover-letter::before,.jd-cover-letter::after{content:"";position:absolute;width:52%;height:55%;border:1px solid var(--shelf-line);}
 .jd-cover-letter::after{width:45%;height:64%;}
@@ -318,12 +319,13 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   z-index:0;
 }
 
-.jd-cover img{
-  object-position:50% 22%;
+.jd-cover img,
+.jd-cover-art{
   transition:transform .28s ease;
 }
 
-.jd-story-card:hover .jd-cover img{
+.jd-story-card:hover .jd-cover img,
+.jd-story-card:hover .jd-cover-art{
   transform:scale(1.012);
 }
 
@@ -589,6 +591,7 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 @media(prefers-reduced-motion:reduce){
   .jd-story-card,
   .jd-cover img,
+  .jd-cover-art,
   .jd-bookshelf .jd-card-tools .jd-icon-button{
     transition:none!important;
     transform:none!important;
@@ -2345,3 +2348,18 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   }
 }
 /* ===== /DW2 custom drag sorting · v1.7.0 ===== */
+
+/* ===== DW2 cover crop renderer · v1.7.2 ===== */
+.jd-cover-art{
+  z-index:0;
+  will-change:background-position;
+}
+.jd-crop-preview .jd-cover-art{
+  transition:none!important;
+}
+@media(max-width:650px){
+  .jd-crop-preview .jd-cover-art{
+    content-visibility:visible!important;
+  }
+}
+/* ===== /DW2 cover crop renderer · v1.7.2 ===== */
