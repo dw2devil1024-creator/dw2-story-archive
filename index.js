@@ -249,28 +249,32 @@ function cropFor(entity) {
     const crop = settings().crops[entity.key] || DEFAULT_CROP;
     return `${bounded(crop.x, 50)}% ${bounded(crop.y, 25)}%`;
 }
+function coverURL(entity, source, native = false) {
+    if (!source) return '';
+    return native && entity.kind === 'char'
+        ? `${source}${source.includes('?') ? '&' : '?'}dw2=${cardsRevision}`
+        : source;
+}
 function cover(entity, className = 'jd-cover') {
     const box = element('div', className);
     const fallback = element('span', 'jd-cover-letter', entity.assistant ? 'ST' : [...entity.name][0] || '书');
     fallback.setAttribute('aria-hidden', 'true'); box.append(fallback);
+
     const custom = customCoverPath(entity);
-    const src = imageSource(entity);
-    if (src) {
-        const img = element('img'); img.alt = '';
-        img.src = custom ? src : (entity.kind === 'char' ? `${src}${src.includes('?') ? '&' : '?'}dw2=${cardsRevision}` : src);
-        img.loading = 'lazy'; img.decoding = 'async'; img.style.setProperty('object-position', cropFor(entity), 'important');
-        img.addEventListener('error', () => {
-            if (custom) {
-                const fallback = nativeImageSource(entity);
-                if (fallback) {
-                    img.src = entity.kind === 'char' ? `${fallback}${fallback.includes('?') ? '&' : '?'}dw2=${cardsRevision}` : fallback;
-                    img.addEventListener('error', () => img.remove(), { once: true });
-                    return;
-                }
-            }
-            img.remove();
-        }, { once: true });
-        box.append(img);
+    const primary = custom ? url(custom) : nativeImageSource(entity);
+    const native = custom ? nativeImageSource(entity) : '';
+    if (primary) {
+        const art = element('div', 'jd-cover-art');
+        art.setAttribute('aria-hidden', 'true');
+        const layers = [
+            coverURL(entity, primary, !custom),
+            coverURL(entity, native, true),
+        ].filter(Boolean);
+        art.style.setProperty('background-image', layers.map(source => `url(${JSON.stringify(source)})`).join(', '), 'important');
+        art.style.setProperty('background-position', cropFor(entity), 'important');
+        art.style.setProperty('background-size', 'cover', 'important');
+        art.style.setProperty('background-repeat', 'no-repeat', 'important');
+        box.append(art);
     }
     return box;
 }
@@ -556,11 +560,13 @@ function editCrop(entity) {
     for (const [key, title] of [['x', '左右位置'], ['y', '上下位置']]) {
         const label = element('label', 'jd-crop-label'); label.append(element('span', '', title));
         const range = element('input'); range.type = 'range'; range.min = '0'; range.max = '100'; range.value = String(values[key]);
-        range.addEventListener('input', () => {
+        const updatePreview = () => {
             values[key] = Number(range.value);
-            const img = image.querySelector('img');
-            if (img) img.style.setProperty('object-position', `${values.x}% ${values.y}%`, 'important');
-        });
+            const art = image.querySelector('.jd-cover-art');
+            if (art) art.style.setProperty('background-position', `${values.x}% ${values.y}%`, 'important');
+        };
+        range.addEventListener('input', updatePreview);
+        range.addEventListener('change', updatePreview);
         label.append(range); body.append(label);
     }
 
