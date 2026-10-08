@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.7.0",
+  "latest": "1.7.1",
   "releases": [
+    {
+      "version": "1.7.1",
+      "branch": "v1.7.1",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.7.1-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "修复封面裁切预览在部分主题/全局样式下左右或上下位置不响应的问题；裁切位置现在使用高优先级内联样式，避免被宿主 CSS 覆盖。"
+    },
     {
       "version": "1.7.0",
       "branch": "v1.7.0",
