@@ -2,7 +2,7 @@
 // Legacy storage namespace kept for upgrades from the original 静读 build.
 // The user-facing product name is 砚台; changing this key would reset shelves.
 export const MODULE = 'jingdu_bookshelf';
-export const DEFAULT_CROP = Object.freeze({ x: 50, y: 25 });
+export const DEFAULT_CROP = Object.freeze({ x: 50, y: 25, zoom: 100 });
 export const TAG_SCOPE_PREFIX = 'tag:';
 export const NO_TAGS = '__yantai_no_tags__';
 export const tagScope = tag => `${TAG_SCOPE_PREFIX}${encodeURIComponent(String(tag))}`;
