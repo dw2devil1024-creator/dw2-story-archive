@@ -258,7 +258,7 @@ function cover(entity, className = 'jd-cover') {
     if (src) {
         const img = element('img'); img.alt = '';
         img.src = custom ? src : (entity.kind === 'char' ? `${src}${src.includes('?') ? '&' : '?'}dw2=${cardsRevision}` : src);
-        img.loading = 'lazy'; img.decoding = 'async'; img.style.objectPosition = cropFor(entity);
+        img.loading = 'lazy'; img.decoding = 'async'; img.style.setProperty('object-position', cropFor(entity), 'important');
         img.addEventListener('error', () => {
             if (custom) {
                 const fallback = nativeImageSource(entity);
@@ -556,7 +556,11 @@ function editCrop(entity) {
     for (const [key, title] of [['x', '左右位置'], ['y', '上下位置']]) {
         const label = element('label', 'jd-crop-label'); label.append(element('span', '', title));
         const range = element('input'); range.type = 'range'; range.min = '0'; range.max = '100'; range.value = String(values[key]);
-        range.addEventListener('input', () => { values[key] = Number(range.value); const img = image.querySelector('img'); if (img) img.style.objectPosition = `${values.x}% ${values.y}%`; });
+        range.addEventListener('input', () => {
+            values[key] = Number(range.value);
+            const img = image.querySelector('img');
+            if (img) img.style.setProperty('object-position', `${values.x}% ${values.y}%`, 'important');
+        });
         label.append(range); body.append(label);
     }
 
