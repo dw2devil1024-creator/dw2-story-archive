@@ -7,7 +7,7 @@ A SillyTavern / TauriTavern character shelf and story archive.
 
 ## 当前版本
 
-**v1.7.2**
+**v1.7.3**
 
 ## 安装
 
@@ -31,6 +31,7 @@ https://github.com/dw2devil1024-creator/dw2-story-archive
 - 整理模式圆形选择控件
 - 独立玻璃整理操作栏
 - DW2 独立书架封面，不修改酒馆角色卡原图
+- 封面支持左右、上下与缩放裁切
 - 长按拖动自定义排序，并持久保存手动顺序
 - `DW2 · Story Archive` 界面品牌
 
