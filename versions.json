@@ -1,8 +1,17 @@
 {
   "schema": 1,
   "extension": "jingdu-bookshelf",
-  "latest": "1.7.2",
+  "latest": "1.7.3",
   "releases": [
+    {
+      "version": "1.7.3",
+      "branch": "v1.7.3",
+      "settings_schema": 1,
+      "minimum_client_version": "1.16.0",
+      "helper": "releases/yantai-bookshelf-v1.7.3-helper.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "新增封面缩放裁切：默认100%保持现有封面不变，放大后可同时进行左右与上下移动；横图、竖图均可获得双轴裁切空间。"
+    },
     {
       "version": "1.7.2",
       "branch": "v1.7.2",
