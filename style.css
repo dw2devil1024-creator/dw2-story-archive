@@ -2341,6 +2341,84 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
   accent-color:#bfd9e5!important;
 }
 
+/* DW2 settings drawer · same tidy action buttons as Preset Console.
+   Scoped to the settings drawer; never touches cover cards or archive dialogs. */
+#jd-bookshelf-settings .inline-drawer-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+#jd-bookshelf-settings .jd-settings-title-group{
+  display:flex;
+  flex:1 1 auto;
+  min-width:0;
+  flex-direction:column;
+  gap:1px;
+}
+#jd-bookshelf-settings .jd-settings-title-group > b{
+  font-weight:600;
+  line-height:1.45;
+}
+#jd-bookshelf-settings .jd-settings-byline{
+  font-family:var(--shelf-font)!important;
+  color:rgba(223,225,229,.66)!important;
+  font-size:10px!important;
+  line-height:1.55;
+  font-weight:400;
+  letter-spacing:.04em;
+  opacity:.77;
+}
+#jd-bookshelf-settings .jd-settings-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+  margin:11px 0 8px;
+}
+#jd-bookshelf-settings .jd-settings-actions .jd-settings-action{
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:35px!important;
+  margin:0!important;
+  padding:7px 8px!important;
+  border:1px solid rgba(196,220,232,.20)!important;
+  border-radius:4px!important;
+  background:rgba(181,210,225,.06)!important;
+  box-shadow:none!important;
+  color:rgba(243,236,231,.92)!important;
+  font-family:var(--shelf-font)!important;
+  font-size:12px!important;
+  font-weight:400!important;
+  line-height:1.35!important;
+  text-align:center!important;
+  text-shadow:none!important;
+  white-space:nowrap;
+  cursor:pointer;
+}
+#jd-bookshelf-settings .jd-settings-actions .jd-settings-action:hover,
+#jd-bookshelf-settings .jd-settings-actions .jd-settings-action:focus-visible{
+  border-color:rgba(199,227,239,.36)!important;
+  background:rgba(183,219,234,.13)!important;
+  color:rgba(255,250,247,.98)!important;
+}
+#jd-bookshelf-settings .jd-settings-actions .jd-settings-action:disabled{
+  opacity:.48;
+  cursor:wait;
+}
+#jd-bookshelf-settings-content > .jd-settings-guide{
+  display:block;
+  margin:6px 0 2px!important;
+  color:rgba(229,219,212,.61)!important;
+  font-size:10px!important;
+  line-height:1.7!important;
+}
+
+
 /* Lighter, more transparent water-blue smoke glass for folder/sort menus. */
 .jd-bookshelf .jd-folder-menu,
 .jd-bookshelf .jd-sort-menu{
