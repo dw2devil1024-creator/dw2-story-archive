@@ -57,12 +57,36 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-shelf-info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:4px 0 10px;color:var(--shelf-muted);font-size:12px;}
 .jd-shelf-info>.jd-text-button{margin-left:auto;}
 .jd-card-tally{padding-inline-start:.35em;}
-.jd-bookshelf .jd-add-character{display:inline-flex;align-items:center;justify-content:center;flex:0 0 26px;width:26px;min-width:26px;height:28px;min-height:28px;margin:0 0 0 -7px;padding:0;border:0;background:none;color:var(--shelf-muted);font:15px/1 system-ui,sans-serif;}
-.jd-bookshelf .jd-add-character i{font-size:15px;}
-.jd-bookshelf .jd-add-character:hover{color:var(--shelf-ink);}
-.jd-bookshelf .jd-add-character:focus-visible{outline-offset:2px;}
-.jd-bookshelf .jd-card-transfer{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:-7px;}
-.jd-bookshelf .jd-card-transfer .jd-add-character{margin:0;}
+/* Matched import/export controls: neutral, compact DW2 glass, no host-theme buttons. */
+.jd-bookshelf .jd-card-transfer{
+  display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;margin:0;
+}
+.jd-bookshelf .jd-card-transfer .jd-add-character{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 38px;width:38px;min-width:38px;height:38px;min-height:38px;
+  margin:0!important;padding:0!important;
+  border:1px solid rgba(238,225,214,.2)!important;
+  border-radius:11px!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.025)),rgba(31,27,25,.2)!important;
+  color:rgba(246,239,232,.88)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055)!important;
+  font:15px/1 system-ui,-apple-system,sans-serif;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  -webkit-tap-highlight-color:transparent;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease!important;
+}
+.jd-bookshelf .jd-card-transfer .jd-add-character i{
+  width:18px;font-size:15px;line-height:1;text-align:center;color:inherit!important;
+}
+.jd-bookshelf .jd-card-transfer .jd-add-character:hover{
+  border-color:rgba(246,231,218,.36)!important;
+  background:rgba(235,221,210,.1)!important;
+  color:#f7ede5!important;
+}
+.jd-bookshelf .jd-card-transfer .jd-add-character:active{transform:scale(.96);}
+.jd-bookshelf .jd-card-transfer .jd-add-character:focus-visible{
+  outline:1px solid rgba(244,230,217,.48)!important;outline-offset:2px!important;
+}
 .jd-sort-status{font-size:11px;}
 .jd-shelf-notice{margin:0;color:var(--shelf-ink);font-size:13px;line-height:1.7;}
 .jd-shelf-notice:not(:empty){margin:12px 0;}
@@ -96,15 +120,86 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-dialog-head h2{margin:0!important;font:400 22px/1.4 var(--shelf-font)!important;color:var(--shelf-ink);}
 .jd-dialog-body{padding:18px 20px 22px;}
 .jd-shelf-dialog>.jd-shelf-notice:not(:empty){padding:0 20px 14px;margin:0;}
-.jd-character-export-list{display:flex;flex-direction:column;gap:7px;max-height:min(38dvh,350px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:2px 4px 2px 0;margin:10px 0 14px;}
-.jd-shelf-dialog .jd-character-export-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:46px;margin:0;padding:11px 12px;border:1px solid var(--shelf-line);border-radius:9px;background:var(--shelf-inset);color:var(--shelf-ink);font:13px/1.5 var(--shelf-font);text-align:left;box-shadow:none;}
-.jd-shelf-dialog .jd-character-export-row[aria-pressed="true"]{border-color:var(--shelf-accent);background:var(--shelf-panel);}
-.jd-shelf-dialog .jd-character-export-row:focus-visible{outline:2px solid var(--shelf-accent);outline-offset:2px;}
+/* Export chooser owns its surface, focus ring, and actions regardless of TT theme. */
+.jd-shelf-dialog.jd-character-export-dialog input.jd-input.jd-character-export-search{
+  display:block;width:100%;min-width:0;min-height:46px;margin:0!important;padding:10px 14px!important;
+  appearance:none!important;-webkit-appearance:none!important;
+  border:1px solid rgba(238,225,214,.2)!important;border-radius:11px!important;
+  background:rgba(235,224,215,.055)!important;background-image:none!important;
+  color:#f3ece7!important;-webkit-text-fill-color:#f3ece7!important;
+  caret-color:#f3ece7!important;color-scheme:dark;
+  font:400 16px/1.5 var(--shelf-font)!important;letter-spacing:0!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+  outline:none!important;filter:none!important;text-shadow:none!important;
+  -webkit-tap-highlight-color:transparent;
+}
+.jd-shelf-dialog.jd-character-export-dialog input.jd-character-export-search::placeholder{
+  color:rgba(230,215,204,.5)!important;-webkit-text-fill-color:rgba(230,215,204,.5)!important;
+  opacity:1!important;
+}
+.jd-shelf-dialog.jd-character-export-dialog input.jd-character-export-search:focus,
+.jd-shelf-dialog.jd-character-export-dialog input.jd-character-export-search:focus-visible{
+  outline:none!important;outline-offset:0!important;
+  border-color:rgba(244,230,217,.38)!important;
+  background:rgba(242,230,219,.08)!important;
+  box-shadow:0 0 0 2px rgba(238,225,214,.065),inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+.jd-shelf-dialog.jd-character-export-dialog input.jd-character-export-search::-webkit-search-cancel-button{
+  filter:grayscale(1) brightness(1.35);opacity:.68;
+}
+.jd-character-export-list{
+  display:flex;flex-direction:column;gap:7px;max-height:min(38dvh,350px);
+  overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  padding:2px 4px 2px 0;margin:10px 0 14px;
+}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  width:100%;min-height:46px;margin:0;padding:11px 12px;
+  border:1px solid rgba(238,225,214,.13)!important;border-radius:9px!important;
+  background:rgba(235,224,215,.035)!important;color:var(--shelf-ink)!important;
+  font:13px/1.5 var(--shelf-font);text-align:left;box-shadow:none!important;
+}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-row[aria-pressed="true"]{
+  border-color:rgba(239,226,214,.52)!important;background:rgba(235,224,215,.11)!important;
+}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-row:focus-visible{
+  outline:1px solid rgba(244,230,217,.43)!important;outline-offset:1px!important;
+}
 .jd-character-export-name{min-width:0;overflow-wrap:anywhere;}
 .jd-character-export-file{flex:0 1 46%;min-width:0;color:var(--shelf-muted);font-size:11px;text-align:right;overflow-wrap:anywhere;}
-.jd-character-export-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:9px;margin-top:12px;}
-.jd-character-export-actions button{min-height:40px;padding:8px 13px;}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-actions{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;align-items:center;margin-top:12px;
+}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-actions .jd-character-export-action{
+  display:inline-flex;align-items:center;justify-content:center;width:100%;min-width:0;
+  min-height:44px;margin:0!important;padding:9px 12px!important;
+  border:1px solid rgba(238,225,214,.21)!important;border-radius:11px!important;
+  background:linear-gradient(180deg,rgba(235,224,215,.095),rgba(235,224,215,.04))!important;
+  color:rgba(247,238,229,.92)!important;
+  font:500 13px/1.5 var(--shelf-font)!important;letter-spacing:.05em!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease!important;
+}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-actions .jd-character-export-action:hover:not(:disabled){
+  border-color:rgba(244,230,217,.37)!important;
+  background:rgba(235,224,215,.12)!important;
+}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-actions .jd-character-export-action:active:not(:disabled){transform:scale(.985);}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-actions .jd-character-export-action:focus-visible{
+  outline:1px solid rgba(244,230,217,.48)!important;outline-offset:2px!important;
+}
+.jd-shelf-dialog.jd-character-export-dialog .jd-character-export-actions .jd-character-export-action:disabled{
+  opacity:.42!important;cursor:not-allowed;transform:none;
+}
 .jd-character-export-selected{margin:8px 0 0;overflow-wrap:anywhere;}
+@media(prefers-reduced-motion:reduce){
+  .jd-bookshelf .jd-card-transfer .jd-add-character,
+  .jd-shelf-dialog.jd-character-export-dialog .jd-character-export-actions .jd-character-export-action{
+    transition:none!important;transform:none!important;
+  }
+}
 .jd-shelf-wide>.jd-dialog-body{padding:0;}
 .jd-dialog-intro{margin:0 0 17px;font-size:13px;color:var(--shelf-muted);line-height:1.7;}
 .jd-save-list{display:flex;flex-direction:column;gap:9px;}
