@@ -21,13 +21,14 @@ const NS = 'dw2pc';
 const ROOT_ID = 'dw2-preset-console';
 const STORAGE_KEY = 'dw2.preset.console.v1';
 const CATEGORIES = [
+    { id: 'groups', label: '分组' },
     { id: 'favs', label: '常用' },
-    { id: 'prompts', label: '预设' },
+    { id: 'prompts', label: '全部' },
     { id: 'modes', label: '模式' },
     { id: 'regex', label: '正则' },
 ];
 let prefs = loadPreferences();
-let tab = 'prompts';
+let tab = 'groups';
 let filter = '';
 let root, launcher, panel, listArea, searchField, sourceStatus, tabBar;
 let open = false;
@@ -84,7 +85,26 @@ function presetSettings() {
     const value = prefs.byPreset[key] || (prefs.byPreset[key] = {});
     if (!Array.isArray(value.favorites)) value.favorites = [];
     if (!value.modes || typeof value.modes !== 'object') value.modes = { novel: '', world: '' };
+    if (!value.groupCollapsed || typeof value.groupCollapsed !== 'object') value.groupCollapsed = {};
     return value;
+}
+
+function presetGroupData() {
+    // baiBaiToolkit's custom group definitions are carried within the preset export.
+    // Gracefully fall back to the full list when those settings aren't available.
+    const groups = promptManager?.serviceSettings?.extensions?.baibaiToolkit?.presetPromptGroups;
+    return {
+        groups: Array.isArray(groups?.groups) ? groups.groups.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) : [],
+        assigned: groups?.prompts && typeof groups.prompts === 'object' ? groups.prompts : {},
+    };
+}
+
+function isProtectedPrompt(item) {
+    if (!item) return false;
+    const data = presetGroupData();
+    const groupName = data.groups.find(g => g.id === item.groupId)?.name || '';
+    return /变量初始化.*别动|变量初始化｜别动|Agent系统入口/.test(groupName) ||
+        /变量初始化.*别动|Agent System Prompt/.test(item.name);
 }
 
 function promptItems() {
@@ -96,6 +116,7 @@ function promptItems() {
     const order = promptManager.getPromptOrderForCharacter(active) || [];
     const promptsById = new Map(settings.prompts.filter(p => p?.identifier).map(p => [p.identifier, p]));
     const names = new Map();
+    const groups = presetGroupData();
 
     return order.filter(p => p?.identifier).map((entry) => {
         const prompt = promptsById.get(entry.identifier);
@@ -111,6 +132,7 @@ function promptItems() {
             marker: !!prompt.marker,
             system: !!prompt.system_prompt,
             entry,
+            groupId: groups.assigned[entry.identifier]?.groupId || null,
         };
     }).filter(Boolean);
 }
@@ -173,6 +195,10 @@ async function setPromptStates(changes) {
 }
 
 async function togglePrompt(item) {
+    if (isProtectedPrompt(item)) {
+        toast('这条属于受保护的初始化入口，请在 TT 原生预设编辑器中调整', 'warning');
+        return;
+    }
     try { await setPromptStates([{ id: item.id, enabled: !item.enabled }]); }
     catch (error) { toast(String(error.message || error), 'error'); render(); }
 }
@@ -205,19 +231,30 @@ function toggleFavorite(item) {
     render();
 }
 
-async function activateMode(mode) {
+function getModePrompts() {
     const settings = presetSettings();
-    const own = findPrompt(settings.modes[mode]);
-    const other = findPrompt(settings.modes[mode === 'novel' ? 'world' : 'novel']);
+    const items = promptItems();
+    const world = items.find(item => item.key === settings.modes.world) ||
+        items.find(item => item.name.includes('织界｜世界演绎者'));
+    const novel = items.find(item => item.key === settings.modes.novel) ||
+        items.find(item => item.name.includes('墨团子 · 原创小说家'));
+    const addon = items.find(item => item.name.includes('墨团子｜小说叙事增强'));
+    return { world, novel, addon };
+}
+
+async function activateMode(mode) {
+    const { world, novel } = getModePrompts();
+    const own = mode === 'world' ? world : novel;
+    const other = mode === 'world' ? novel : world;
     if (!own || !other || own.id === other.id) {
-        toast('请先分别绑定小说模式和沉浸世界模式的真实预设条目', 'warning');
+        toast('请先绑定两条真实的身份核心条目', 'warning');
         return;
     }
     try {
         if (await setPromptStates([
             { id: own.id, enabled: true },
             { id: other.id, enabled: false },
-        ])) toast('已切换到' + (mode === 'novel' ? '小说模式' : '沉浸世界模式'), 'success');
+        ])) toast('已切换到' + (mode === 'novel' ? '墨团子·小说家' : '织界·世界演绎者') + '身份', 'success');
     } catch (error) {
         toast(String(error.message || error), 'error');
         render();
@@ -230,7 +267,7 @@ function currentSignature() {
     try { regex = regexItems(); } catch (_) {}
     return JSON.stringify([
         presetIdentity(),
-        entries.map(x => [x.id, x.name, x.enabled]),
+        entries.map(x => [x.id, x.name, x.enabled, x.groupId]),
         regex.map(x => [x.type, x.id, x.name, x.enabled]),
         tab, filter,
     ]);
@@ -253,9 +290,12 @@ function itemRow(item, isPrompt) {
 
     if (isPrompt) {
         const settings = presetSettings();
+        const protectedItem = isProtectedPrompt(item);
+        if (protectedItem) row.classList.add('is-protected');
         const star = button(settings.favorites.includes(item.key) ? '★' : '☆', 'favorite', () => toggleFavorite(item), '加入／移除常用');
         star.setAttribute('aria-label', '收藏 ' + item.name);
-        row.append(star, makeToggle(item.enabled, () => togglePrompt(item)));
+        if (protectedItem) row.append(node('span', 'protected', '锁定'));
+        else row.append(star, makeToggle(item.enabled, () => togglePrompt(item)));
     } else {
         row.append(makeToggle(item.enabled, () => toggleRegex(item)));
     }
@@ -269,6 +309,55 @@ function heading(label, count = null) {
 }
 
 function empty(label) { return node('div', 'empty', label); }
+
+function showGroups() {
+    const items = promptItems();
+    const data = presetGroupData();
+    if (!items.length) {
+        listArea.append(empty('预设管理器尚未就绪，请先选择 Chat Completion 预设。'));
+        return;
+    }
+    if (!data.groups.length) {
+        listArea.append(node('p', 'help', '没有读取到该预设的自定义分组信息，暂按全部条目展示。'));
+        showPrompts(false);
+        return;
+    }
+    const settings = presetSettings();
+    const claimed = new Set();
+    const needle = filter.toLocaleLowerCase();
+    for (const group of data.groups) {
+        const groupItems = items.filter(x => x.groupId === group.id && x.name.toLocaleLowerCase().includes(needle));
+        if (!groupItems.length && filter) continue;
+        items.filter(x => x.groupId === group.id).forEach(x => claimed.add(x.id));
+        const wrap = node('section', 'group-section');
+        const header = button('', 'group-expand', () => {
+            const visible = !content.hidden;
+            content.hidden = visible;
+            header.setAttribute('aria-expanded', String(!visible));
+            arrow.textContent = visible ? '⌄' : '⌃';
+            settings.groupCollapsed[group.id] = visible;
+            savePreferences();
+        });
+        const name = node('span', 'group-heading', group.name);
+        const count = node('span', 'group-count', String(groupItems.length));
+        const arrow = node('span', 'group-arrow', '⌄');
+        header.append(name, count, arrow);
+        wrap.append(header);
+        const content = node('div', 'group-body');
+        const collapsed = !filter && (settings.groupCollapsed[group.id] ?? !!group.collapsed);
+        content.hidden = collapsed;
+        arrow.textContent = collapsed ? '⌄' : '⌃';
+        header.setAttribute('aria-expanded', String(!collapsed));
+        groupItems.forEach(x => content.append(itemRow(x, true)));
+        wrap.append(content);
+        listArea.append(wrap);
+    }
+    const ungrouped = items.filter(x => !claimed.has(x.id) && x.name.toLocaleLowerCase().includes(needle));
+    if (ungrouped.length) {
+        listArea.append(heading('未分组条目', ungrouped.length));
+        ungrouped.forEach(x => listArea.append(itemRow(x, true)));
+    }
+}
 
 function showPrompts(favoritesOnly) {
     const items = promptItems();
@@ -316,18 +405,28 @@ function showModes() {
     const items = promptItems();
     listArea.append(heading('双模式快捷切换'));
     const help = node('p', 'help',
-        '先把两种模式绑定到你预设中真正的开关条目。切换时只改这两条，其他叠加项和变量初始化均保持原样。');
+        '你的《织界》设定为「身份二选一，小说叙事可叠加」。身份按钮仅切换织界与墨团子，不会关闭独立的小说叙事增强或修改变量初始化。');
     listArea.append(help);
     if (!items.length) { listArea.append(empty('当前还没有可绑定的预设条目。')); return; }
-    listArea.append(modeSelector('novel', '小说模式', items));
-    listArea.append(modeSelector('world', '沉浸世界模式', items));
+    const { world, novel, addon } = getModePrompts();
+    if (!world || !novel) {
+        listArea.append(modeSelector('world', '世界演绎身份', items));
+        listArea.append(modeSelector('novel', '小说家身份', items));
+    } else {
+        listArea.append(node('p', 'help', '已识别身份条目：' + world.name + ' / ' + novel.name));
+    }
     const controls = node('div', 'mode-actions');
     controls.append(
-        button('开启小说模式', 'mode-button', () => activateMode('novel')),
-        button('开启沉浸世界', 'mode-button', () => activateMode('world'))
+        button('织界 · 世界演绎', 'mode-button', () => activateMode('world')),
+        button('墨团子 · 小说家', 'mode-button', () => activateMode('novel'))
     );
     listArea.append(controls);
-    listArea.append(node('p', 'help', '提醒：绑定会跟随当前预设单独保存；重导入后尽可能按名称恢复，重名条目需重新检查。'));
+    if (addon) {
+        listArea.append(heading('小说叙事增强 · 可叠加'));
+        listArea.append(itemRow(addon, true));
+        listArea.append(node('p', 'help', '这条是独立可选项，即使使用「织界」身份也能开启，不与身份开关互斥。'));
+    }
+    listArea.append(node('p', 'help', '不同版本可能有不同名称；匹配不到时可手动绑定。切换身份后仍建议检查开关状态。'));
 }
 
 function showRegex() {
@@ -361,6 +460,7 @@ function render() {
     listArea.replaceChildren();
     if (tab === 'modes') showModes();
     else if (tab === 'regex') showRegex();
+    else if (tab === 'groups') showGroups();
     else showPrompts(tab === 'favs');
     lastSignature = currentSignature();
 }
