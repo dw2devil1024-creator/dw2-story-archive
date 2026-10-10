@@ -136,6 +136,10 @@ function charFor(entity) {
     return characterIndex.get(entity.id);
 }
 function groupFor(entity) { return (ctx().groups || []).find(g => String(g.id) === entity.id); }
+function entityForKey(key) {
+    // Re-read live entities after deletion; cached cards may have become stale.
+    return entitiesFromContext(ctx(), assistantAvatar()).find(entity => entity.key === key) || null;
+}
 
 async function request(path, body) {
     const controller = new AbortController();
