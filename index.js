@@ -860,6 +860,9 @@ function createShelf(isHome = false) {
     const sortStatus = element('span', 'jd-sort-status'); sortStatus.setAttribute('role', 'status');
     const addCharacter = button('', 'jd-add-character', openNativeCharacterImporter, '从文件导入角色卡');
     const addIcon = element('i', 'fa-solid fa-file-import'); addIcon.setAttribute('aria-hidden', 'true'); addCharacter.append(addIcon);
+    const exportCharacter = button('', 'jd-add-character jd-export-character', openNativeCharacterExporter, '从书架导出角色卡');
+    const exportIcon = element('i', 'fa-solid fa-file-export'); exportIcon.setAttribute('aria-hidden', 'true'); exportCharacter.append(exportIcon);
+    const transfer = element('div', 'jd-card-transfer'); transfer.append(addCharacter, exportCharacter);
     const notice = element('p', 'jd-shelf-notice'); notice.setAttribute('role', 'status');
     const grid = element('div', 'jd-story-grid');
     const pager = element('nav', 'jd-pager'); pager.setAttribute('aria-label', '书架分页');
@@ -874,7 +877,7 @@ function createShelf(isHome = false) {
     tabs.append(shell.organizer.control);
     const favoriteTab = button('收藏', 'jd-tab', () => { shell.filter = shell.filter === 'favorites' ? 'all' : 'favorites'; shell.page = 0; shell.draw(); shell.remember(); });
     favoriteTab.dataset.filter = 'favorites'; tabs.append(favoriteTab);
-    info.append(tally, addCharacter, sortStatus, shell.organizer.organize, refresh);
+    info.append(tally, transfer, sortStatus, shell.organizer.organize, refresh);
     const pageLabel = element('span', 'jd-page-label'); pageLabel.setAttribute('aria-live', 'polite');
     const turnPage = delta => {
         shell.page += delta; shell.draw(); if (!shell.query) shell.remember();
@@ -1010,6 +1013,95 @@ function restoreHome() {
         rootHome.root.querySelector('.jd-tab')?.focus({ preventScroll: true });
     }
 }
+function openNativeCharacterExporter() {
+    if (opening) { report('书架正在处理其他操作，请稍候。'); return; }
+    const cards = entitiesFromContext(ctx(), assistantAvatar())
+        .filter(entity => entity.kind === 'char')
+        .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN') || a.id.localeCompare(b.id));
+    if (!cards.length) { report('当前没有可以导出的角色卡。'); return; }
+
+    const { modal, body, notice } = dialog('导出角色卡');
+    modal.classList.add('jd-character-export-dialog');
+    body.append(element('p', 'jd-dialog-intro', '选择角色卡后导出 PNG 或 JSON。导出使用 TT 原生角色数据，不包含聊天记录或书架独立封面。'));
+    const search = element('input', 'jd-input jd-character-export-search');
+    search.type = 'search'; search.placeholder = '搜索角色名或文件名…';
+    search.setAttribute('aria-label', '搜索要导出的角色卡');
+    const list = element('div', 'jd-character-export-list');
+    const selectedLabel = element('p', 'jd-dialog-intro jd-character-export-selected', '请选择要导出的角色卡。');
+    const actions = element('div', 'jd-character-export-actions');
+    let selected = null, busy = false;
+
+    async function exportCard(format) {
+        if (busy || !selected || !modal.open) return;
+        if (!ctx().characters?.some(character => character?.avatar === selected.id)) {
+            notice.textContent = '这张角色卡已不存在，请关闭窗口重新选择。';
+            return;
+        }
+        busy = true;
+        png.disabled = json.disabled = search.disabled = true;
+        notice.textContent = '正在准备角色卡文件…';
+        try {
+            const response = await fetch(url('api/characters/export'), {
+                method: 'POST',
+                headers: { ...ctx().getRequestHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avatar_url: selected.id, format }),
+                cache: 'no-store',
+            });
+            if (!response.ok) {
+                let detail = '';
+                try { const result = await response.json(); detail = result?.error || result?.message || ''; } catch {}
+                throw new Error(detail || ('角色卡导出失败（HTTP ' + response.status + '）'));
+            }
+            const blob = await response.blob();
+            if (!blob.size) throw new Error('酒馆返回了空文件，已停止导出。');
+            const stem = String(selected.id).replace(/\.png$/i, '')
+                .replace(/[\\/:*?"<>|]+/g, '_').replace(/^[.\s]+|[.\s]+$/g, '').slice(0, 100) || '角色卡';
+            // Reuse the host's download pipeline: iPhone receives the native Share Sheet.
+            const { downloadBlobWithRuntime } = await import(new URL('scripts/file-export.js', appRoot).href);
+            const result = await downloadBlobWithRuntime(blob, stem + '.' + format, { fallbackName: '角色卡.' + format });
+            notice.textContent = result?.completed === false
+                ? '已取消系统分享，没有保存文件。'
+                : result?.mode === 'ios-native-share'
+                    ? '✓ 角色卡已通过系统分享菜单导出。'
+                    : '✓ 文件已提交给系统下载或保存，请检查保存位置。';
+        } catch (error) {
+            console.warn('[DW2 Story Archive] 角色卡导出失败', error);
+            notice.textContent = error?.message || '角色卡导出失败，请稍后重试。';
+        } finally {
+            busy = false;
+            search.disabled = false;
+            png.disabled = json.disabled = !selected;
+        }
+    }
+
+    const png = button('导出 PNG', 'jd-primary-button jd-character-export-action', () => { void exportCard('png'); });
+    const json = button('导出 JSON', 'jd-secondary-button jd-character-export-action', () => { void exportCard('json'); });
+    png.disabled = json.disabled = true;
+    actions.append(png, json);
+    const draw = () => {
+        list.replaceChildren();
+        const query = search.value.trim().toLocaleLowerCase();
+        const matches = cards.filter(card => !query || card.name.toLocaleLowerCase().includes(query) || card.id.toLocaleLowerCase().includes(query));
+        if (!matches.length) list.append(element('p', 'jd-dialog-intro', '没有找到对应角色卡。'));
+        for (const card of matches) {
+            const chosen = button('', 'jd-character-export-row', () => {
+                if (busy) return;
+                selected = card;
+                selectedLabel.textContent = '已选择：' + card.name + '（' + card.id + '）';
+                notice.textContent = '';
+                png.disabled = json.disabled = false;
+                draw();
+            }, '选择角色卡 ' + card.name + '（' + card.id + '）');
+            chosen.setAttribute('aria-pressed', String(card.key === selected?.key));
+            chosen.append(element('span', 'jd-character-export-name', card.name), element('small', 'jd-character-export-file', card.id));
+            list.append(chosen);
+        }
+    };
+    search.addEventListener('input', draw);
+    body.append(search, list, selectedLabel, actions);
+    draw(); search.focus({ preventScroll: true });
+}
+
 function openNativeCharacterImporter() {
     // Reuse the native import button in the user's click stack. This opens
     // the OS file picker without leaving the bookshelf or navigating through
