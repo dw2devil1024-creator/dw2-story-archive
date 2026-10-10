@@ -1138,7 +1138,12 @@ function installControls() {
         icon.setAttribute('aria-hidden', 'true');
         header.tabIndex = 0; header.setAttribute('role', 'button');
         header.setAttribute('aria-expanded', 'false'); header.setAttribute('aria-controls', 'jd-bookshelf-settings-content');
-        header.append(element('b', '', 'DW2 · Story Archive'), icon);
+        const titleGroup = element('div', 'jd-settings-title-group');
+        titleGroup.append(
+            element('b', '', 'DW2 · Story Archive'),
+            element('span', 'jd-settings-byline', 'S.A. · DW2'),
+        );
+        header.append(titleGroup, icon);
         // Native delegated click handling owns the drawer and its theme styling.
         header.addEventListener('click', () => header.setAttribute('aria-expanded', String(icon.classList.contains('down'))));
         header.addEventListener('keydown', event => {
@@ -1149,8 +1154,15 @@ function installControls() {
         const label = element('label', 'checkbox_label'); const check = element('input'); check.type = 'checkbox'; check.checked = settings().enabled;
         check.addEventListener('change', () => { settings().enabled = check.checked; dismissedHome = false; save(); scheduleHome(); });
         label.append(check, element('span', '', '首页显示 Story Archive'));
-        content.append(label, button('打开书架', 'menu_button', openShelf), element('small', '', '封面右上角：图钉置顶、星号收藏、裁切调整封面。置顶按点击先后排列，其余可切换排序；点封面进入存档列表，右上角可新建聊天。'));
-        content.append(button('版本与更新', 'menu_button jd-version-open', showVersionManager));
+        content.append(label);
+        // One uniform button row; the existing book and update callbacks stay intact.
+        const actions = element('div', 'jd-settings-actions');
+        actions.append(
+            button('打开书架', 'menu_button jd-settings-action', openShelf),
+            button('版本与更新', 'menu_button jd-version-open jd-settings-action', showVersionManager),
+        );
+        content.append(actions);
+        content.append(element('small', 'jd-settings-guide', '置顶 · 收藏 · 更换封面 · 自由排序 · 查看存档'));
         drawer.append(header, content); panel.append(drawer); host.append(panel);
     }
 }
