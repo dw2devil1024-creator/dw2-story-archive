@@ -57,34 +57,30 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-shelf-info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:4px 0 10px;color:var(--shelf-muted);font-size:12px;}
 .jd-shelf-info>.jd-text-button{margin-left:auto;}
 .jd-card-tally{padding-inline-start:.35em;}
-/* Matched import/export controls: neutral, compact DW2 glass, no host-theme buttons. */
+/* DW2 character transfer: original icon-only controls; no button surface. */
 .jd-bookshelf .jd-card-transfer{
-  display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;margin:0;
+  display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:-7px;
 }
 .jd-bookshelf .jd-card-transfer .jd-add-character{
   display:inline-flex;align-items:center;justify-content:center;
-  flex:0 0 38px;width:38px;min-width:38px;height:38px;min-height:38px;
+  flex:0 0 26px;width:26px;min-width:26px;height:28px;min-height:28px;
   margin:0!important;padding:0!important;
-  border:0!important;
-  border-radius:11px!important;
-  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.025)),rgba(31,27,25,.2)!important;
-  color:rgba(246,239,232,.88)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.055)!important;
+  border:0!important;border-radius:0!important;
+  background:none!important;background-image:none!important;
+  box-shadow:none!important;filter:none!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  color:var(--shelf-muted)!important;
   font:15px/1 system-ui,-apple-system,sans-serif;
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   -webkit-tap-highlight-color:transparent;
-  transition:background .16s ease,transform .16s ease!important;
 }
 .jd-bookshelf .jd-card-transfer .jd-add-character i{
-  width:18px;font-size:15px;line-height:1;text-align:center;color:inherit!important;
+  font-size:15px;line-height:1;color:inherit!important;
 }
-.jd-bookshelf .jd-card-transfer .jd-add-character:hover{
-  background:rgba(235,221,210,.1)!important;
-  color:#f7ede5!important;
-}
-.jd-bookshelf .jd-card-transfer .jd-add-character:active{transform:scale(.96);}
+.jd-bookshelf .jd-card-transfer .jd-add-character:hover,
 .jd-bookshelf .jd-card-transfer .jd-add-character:focus-visible{
-  outline:1px solid rgba(244,230,217,.48)!important;outline-offset:2px!important;
+  color:var(--shelf-ink)!important;
+  border:0!important;background:none!important;box-shadow:none!important;
+  outline:none!important;
 }
 .jd-sort-status{font-size:11px;}
 .jd-shelf-notice{margin:0;color:var(--shelf-ink);font-size:13px;line-height:1.7;}
