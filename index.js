@@ -396,11 +396,19 @@ function updateCounts(key, count) {
     }
 }
 
-function showArchives(entity, cached) {
+function showArchives(entity, cached, successMessage = '') {
     const existing = [...document.querySelectorAll('.jd-archives-dialog[open]')].find(d => d.dataset.entity === entity.key);
     if (existing) { existing.querySelector('.jd-dialog-head button')?.focus(); return; }
     const { modal, body, notice } = dialog(entity.name);
     modal.classList.add('jd-archives-dialog'); modal.dataset.entity = entity.key;
+    const successNotice = successMessage ? `✓ ${successMessage}` : '';
+    if (successNotice) {
+        notice.textContent = successNotice;
+        const timer = setTimeout(() => {
+            if (notice.textContent === successNotice) notice.textContent = '';
+        }, 3200);
+        modal.addEventListener('close', () => clearTimeout(timer), { once: true });
+    }
     const revision = cardsRevision;
     const current = () => enabledRuntime && revision === cardsRevision && modal.isConnected && modal.open;
     const top = element('div', 'jd-archive-toolbar');
@@ -454,7 +462,9 @@ function showArchives(entity, cached) {
             const files = await getFiles(entity, { fresh });
             if (!current() || id !== requestId) return;
             counts.set(entity.key, files.length); updateCounts(entity.key, files.length);
-            rows = mergeDetails(files, rows || []); detailsState = 'loading'; notice.textContent = ''; draw();
+            rows = mergeDetails(files, rows || []); detailsState = 'loading';
+            if (notice.textContent !== successNotice) notice.textContent = '';
+            draw();
             if (!files.length) return;
             // Previews can be slow on long chats; filenames are already usable.
             getDetails(entity, files).then(details => {
@@ -520,11 +530,12 @@ function confirmDelete(entity, row, archive, current) {
                 modal.close(); archive.close();
                 const next = entityForKey(entity.key);
                 if (next) {
-                    showArchives(next, result.files);
+                    showArchives(next, result.files, '已删除这份存档。');
                     const updated = [...document.querySelectorAll('.jd-archives-dialog[open]')].find(d => d.dataset.entity === entity.key);
                     if (updated) updated.scrollTop = scrollTop;
                 }
-                globalThis.toastr?.success('已删除这份存档。', 'DW2 · Story Archive');
+                // The archive dialog occupies the top layer; show success inside it.
+                if (!next) globalThis.toastr?.success('已删除这份存档。', 'DW2 · Story Archive');
             }
         } catch (error) {
             const message = error.message || '删除未完成，请刷新列表检查';
