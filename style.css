@@ -61,6 +61,8 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-bookshelf .jd-add-character i{font-size:15px;}
 .jd-bookshelf .jd-add-character:hover{color:var(--shelf-ink);}
 .jd-bookshelf .jd-add-character:focus-visible{outline-offset:2px;}
+.jd-bookshelf .jd-card-transfer{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:-7px;}
+.jd-bookshelf .jd-card-transfer .jd-add-character{margin:0;}
 .jd-sort-status{font-size:11px;}
 .jd-shelf-notice{margin:0;color:var(--shelf-ink);font-size:13px;line-height:1.7;}
 .jd-shelf-notice:not(:empty){margin:12px 0;}
@@ -94,6 +96,15 @@ body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[
 .jd-dialog-head h2{margin:0!important;font:400 22px/1.4 var(--shelf-font)!important;color:var(--shelf-ink);}
 .jd-dialog-body{padding:18px 20px 22px;}
 .jd-shelf-dialog>.jd-shelf-notice:not(:empty){padding:0 20px 14px;margin:0;}
+.jd-character-export-list{display:flex;flex-direction:column;gap:7px;max-height:min(38dvh,350px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:2px 4px 2px 0;margin:10px 0 14px;}
+.jd-shelf-dialog .jd-character-export-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:46px;margin:0;padding:11px 12px;border:1px solid var(--shelf-line);border-radius:9px;background:var(--shelf-inset);color:var(--shelf-ink);font:13px/1.5 var(--shelf-font);text-align:left;box-shadow:none;}
+.jd-shelf-dialog .jd-character-export-row[aria-pressed="true"]{border-color:var(--shelf-accent);background:var(--shelf-panel);}
+.jd-shelf-dialog .jd-character-export-row:focus-visible{outline:2px solid var(--shelf-accent);outline-offset:2px;}
+.jd-character-export-name{min-width:0;overflow-wrap:anywhere;}
+.jd-character-export-file{flex:0 1 46%;min-width:0;color:var(--shelf-muted);font-size:11px;text-align:right;overflow-wrap:anywhere;}
+.jd-character-export-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:9px;margin-top:12px;}
+.jd-character-export-actions button{min-height:40px;padding:8px 13px;}
+.jd-character-export-selected{margin:8px 0 0;overflow-wrap:anywhere;}
 .jd-shelf-wide>.jd-dialog-body{padding:0;}
 .jd-dialog-intro{margin:0 0 17px;font-size:13px;color:var(--shelf-muted);line-height:1.7;}
 .jd-save-list{display:flex;flex-direction:column;gap:9px;}
