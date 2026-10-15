@@ -28,8 +28,6 @@
 #chat.jd-bookshelf-home>.jd-bookshelf{flex:0 0 auto;}
 /* Replace only native welcome content, not arbitrary children / popup hosts.
    Keep the native composer and extension entry points available. */
-/* Startup handoff only: restore the original welcome automatically on failure. */
-body.jd-bookshelf-home-handoff:not(.jd-bookshelf-home-active) #chat > .welcomePanel{visibility:hidden!important;}
 body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.welcomePanel,
 body.jd-bookshelf-home-active #chat.jd-bookshelf-home>.mes:is([type="welcome"],[type="welcome_prompt"],[type="assistant_message"],[type="assistant_note"]){display:none!important;}
 #jd-bookshelf-return{flex:0 0 auto;width:auto;white-space:nowrap;text-indent:0;text-shadow:none;}

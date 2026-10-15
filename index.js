@@ -22,7 +22,6 @@ let opening = false;
 let dismissedHome = false;
 let observer;
 let frame;
-let homeHandoffTimer = null;
 let welcomeModule;
 let coreModule;
 let groupModule;
@@ -998,21 +997,6 @@ function hasSelection() {
     const c = ctx();
     return (c.characterId !== undefined && c.characterId !== null && c.characterId !== '') || (c.groupId !== undefined && c.groupId !== null && c.groupId !== '');
 }
-// Hide only TT's native welcome while DW2 takes over. Never trap users on a
-// blank page: a bounded timeout restores the native home if mounting fails.
-function finishHomeHandoff() {
-    document.body.classList.remove('jd-bookshelf-home-handoff');
-    if (homeHandoffTimer !== null) { clearTimeout(homeHandoffTimer); homeHandoffTimer = null; }
-}
-function beginHomeHandoff() {
-    if (!settings().enabled || dismissedHome || hasSelection()) return;
-    document.body.classList.add('jd-bookshelf-home-handoff');
-    if (homeHandoffTimer !== null) clearTimeout(homeHandoffTimer);
-    homeHandoffTimer = setTimeout(() => {
-        homeHandoffTimer = null;
-        document.body.classList.remove('jd-bookshelf-home-handoff');
-    }, 1200);
-}
 function unmountHome() {
     document.body.classList.remove('jd-bookshelf-home-active');
     document.getElementById('chat')?.classList.remove('jd-bookshelf-home');
@@ -1036,16 +1020,12 @@ function reconcileHome() {
         const shortcuts = welcome.querySelector('.welcomeShortcuts') || welcome.querySelector('.welcomeHeader') || welcome;
         if (entry.parentElement !== shortcuts) shortcuts.append(entry);
     } else returnButton?.remove();
-    if (!eligible || dismissedHome) {
-        if (dismissedHome || !enabledRuntime || !settings().enabled || hasSelection()) finishHomeHandoff();
-        unmountHome(); return;
-    }
-    if (rootHome?.root.isConnected) { finishHomeHandoff(); return; }
+    if (!eligible || dismissedHome) { unmountHome(); return; }
+    if (rootHome?.root.isConnected) return;
     unmountHome(); rootHome = createShelf(true); chat.prepend(rootHome.root);
     chat.classList.add('jd-bookshelf-home'); document.body.classList.add('jd-bookshelf-home-active');
     rootHome.layout = attachHomeLayout(chat, rootHome.root);
     chat.scrollTop = 0;
-    finishHomeHandoff();
 }
 function scheduleHome() { if (frame || !enabledRuntime) return; frame = requestAnimationFrame(() => { frame = null; reconcileHome(); }); }
 // Mount the shelf as soon as TT adds its welcome panel, before the next paint
@@ -1221,7 +1201,6 @@ function installControls() {
 export function onEnable() {
     if (enabledRuntime) return;
     enabledRuntime = true;
-    beginHomeHandoff();
     const context = ctx(); const types = context.eventTypes || context.event_types;
     const subscribe = (type, fn) => { if (type) { context.eventSource.on(type, fn); listeners.push([type, fn]); } };
     const ready = () => { installControls(); if (!observer && document.getElementById('chat')) { observer = new MutationObserver(onHomeContentChanged); observer.observe(document.getElementById('chat'), { childList: true }); } onHomeContentChanged(); };
@@ -1238,7 +1217,6 @@ export function onEnable() {
 }
 export function onDisable() {
     enabledRuntime = false;
-    finishHomeHandoff();
     versionManager?.dispose(); versionManager = null;
     for (const request of requests) request.abort(); requests.clear();
     invalidateArchiveData();
