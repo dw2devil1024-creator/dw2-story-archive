@@ -925,7 +925,9 @@ function createShelf(isHome = false) {
             const entity = shell.entities.get(key);
             if (entity && entity.kind !== 'assistant') loadCount(entity).then(value => updateCounts(key, value));
         }
-    }, { rootMargin: '420px 0px' });
+    // Home scrolls inside #chat; using the viewport as the root can delay
+    // intersection callbacks until a card is already visible inside #chat.
+    }, { root: isHome ? document.getElementById('chat') : null, rootMargin: '440px 0px' });
     shell.draw = () => {
         const all = entitiesFromContext(ctx(), assistantAvatar());
         shell.entities = new Map(all.map(entity => [entity.key, entity]));
@@ -938,6 +940,9 @@ function createShelf(isHome = false) {
             shell.visibility?.disconnect();
             const window = pageWindow(ordered, shell.page, settings().pageSize); shell.page = window.page;
             shell.visible.clear(); grid.replaceChildren(...window.items.map(entity => card(entity, shell)));
+            // Start first-screen covers immediately, before waiting for the
+            // asynchronous visibility observer. Only the remaining cards are lazy.
+            for (const item of [...grid.children].slice(0, 6)) activateCover(item.querySelector('.jd-cover-art'));
             if (!chosen.length) grid.append(element('p', 'jd-empty', shell.filter === 'favorites' ? '这里还没有收藏的角色卡。' : shell.scope === 'all' ? '没有找到匹配的角色卡或群聊。' : '这个文件夹里还没有匹配的卡片。点「整理」可批量移入。'));
             for (const entity of window.items) if (counts.has(entity.key)) updateCounts(entity.key, counts.get(entity.key));
             pageLabel.textContent = `${window.page + 1} / ${window.pages}`;
@@ -1023,6 +1028,14 @@ function reconcileHome() {
     chat.scrollTop = 0;
 }
 function scheduleHome() { if (frame || !enabledRuntime) return; frame = requestAnimationFrame(() => { frame = null; reconcileHome(); }); }
+// Mount the shelf as soon as TT adds its welcome panel, before the next paint
+// when possible. Keep frame batching for all other chat DOM changes.
+function onHomeContentChanged() {
+    const chat = document.getElementById('chat');
+    if (enabledRuntime && !dismissedHome && settings().enabled && !hasSelection() && chat?.querySelector(':scope > .welcomePanel')) {
+        reconcileHome();
+    } else scheduleHome();
+}
 
 function restoreHome() {
     dismissedHome = false;
@@ -1190,7 +1203,7 @@ export function onEnable() {
     enabledRuntime = true;
     const context = ctx(); const types = context.eventTypes || context.event_types;
     const subscribe = (type, fn) => { if (type) { context.eventSource.on(type, fn); listeners.push([type, fn]); } };
-    const ready = () => { installControls(); if (!observer && document.getElementById('chat')) { observer = new MutationObserver(scheduleHome); observer.observe(document.getElementById('chat'), { childList: true }); } scheduleHome(); };
+    const ready = () => { installControls(); if (!observer && document.getElementById('chat')) { observer = new MutationObserver(onHomeContentChanged); observer.observe(document.getElementById('chat'), { childList: true }); } onHomeContentChanged(); };
     subscribe(types.APP_READY, () => {
         ready();
         for (const shell of shells) if (!shell.viewTouched) { Object.assign(shell, shelfView(settings())); shell.draw(); }
