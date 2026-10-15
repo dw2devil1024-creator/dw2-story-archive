@@ -251,6 +251,8 @@ function imageSource(entity) {
 }
 const coverRatioCache = new Map();
 const coverRatioPending = new Map();
+// Defer card-image requests until the card is approaching the viewport.
+const deferredCovers = new WeakMap();
 function zoomValue(value) {
     const numeric = Number(value);
     return Number.isFinite(numeric) ? Math.max(100, Math.min(200, numeric)) : 100;
@@ -291,6 +293,8 @@ function applyCoverFrame(art, source, values) {
     art.dataset.coverZoom = String(zoom);
     art.style.setProperty('background-position', `${x}% ${y}%`, 'important');
     art.style.setProperty('background-size', 'cover', 'important');
+    // At 100%, CSS cover already gives the correct crop without an image-size probe.
+    if (zoom === 100) return;
     void coverRatio(source).then(ratio => {
         if (!art.isConnected || art.dataset.coverSource !== source) return;
         const liveZoom = zoomValue(art.dataset.coverZoom);
@@ -299,6 +303,14 @@ function applyCoverFrame(art, source, values) {
         const size = ratio >= boxRatio ? `auto ${liveZoom}%` : `${liveZoom}% auto`;
         art.style.setProperty('background-size', size, 'important');
     });
+}
+function activateCover(art) {
+    if (!art) return;
+    const plan = deferredCovers.get(art);
+    if (!plan) return;
+    deferredCovers.delete(art);
+    art.style.setProperty('background-image', plan.layers, 'important');
+    applyCoverFrame(art, plan.source, plan.crop);
 }
 function cover(entity, className = 'jd-cover') {
     const box = element('div', className);
@@ -315,10 +327,13 @@ function cover(entity, className = 'jd-cover') {
             coverURL(entity, primary, !custom),
             coverURL(entity, native, true),
         ].filter(Boolean);
-        art.style.setProperty('background-image', layers.map(source => `url(${JSON.stringify(source)})`).join(', '), 'important');
+        deferredCovers.set(art, {
+            layers: layers.map(source => `url(${JSON.stringify(source)})`).join(', '),
+            source: primary,
+            crop: cropValues(entity),
+        });
         art.style.setProperty('background-repeat', 'no-repeat', 'important');
         box.append(art);
-        applyCoverFrame(art, primary, cropValues(entity));
     }
     return box;
 }
@@ -609,6 +624,8 @@ function editAlias(entity, row, refresh) {
 function editCrop(entity) {
     const { modal, body } = dialog('调整书架封面');
     const image = cover(entity, 'jd-cover jd-crop-preview');
+    // Cropping previews must load immediately, regardless of card visibility.
+    activateCover(image.querySelector('.jd-cover-art'));
     body.append(image, element('p', 'jd-dialog-intro', '这里只调整 DW2 书架封面，不会修改酒馆角色卡原图。'));
     const values = cropValues(entity);
     const source = imageSource(entity);
@@ -785,9 +802,10 @@ function card(entity, shell) {
     item.append(actions);
     shell.visible.set(entity.key, item);
     shell.organizer.decorateCard(item, main, entity);
-    if (entity.kind !== 'assistant') {
-        if (shell.visibility) shell.visibility.observe(item);
-        else loadCount(entity).then(value => updateCounts(entity.key, value));
+    if (shell.visibility) shell.visibility.observe(item);
+    else {
+        activateCover(image.querySelector('.jd-cover-art'));
+        if (entity.kind !== 'assistant') loadCount(entity).then(value => updateCounts(entity.key, value));
     }
     return item;
 }
@@ -903,10 +921,11 @@ function createShelf(isHome = false) {
             const key = entry.target.dataset.key;
             // Ignore queued observations from a page that has already been replaced.
             if (shell.visible.get(key) !== entry.target) continue;
+            activateCover(entry.target.querySelector('.jd-cover-art'));
             const entity = shell.entities.get(key);
-            if (entity) loadCount(entity).then(value => updateCounts(key, value));
+            if (entity && entity.kind !== 'assistant') loadCount(entity).then(value => updateCounts(key, value));
         }
-    }, { rootMargin: '180px 0px' });
+    }, { rootMargin: '420px 0px' });
     shell.draw = () => {
         const all = entitiesFromContext(ctx(), assistantAvatar());
         shell.entities = new Map(all.map(entity => [entity.key, entity]));
